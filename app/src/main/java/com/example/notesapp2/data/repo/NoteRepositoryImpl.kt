@@ -5,14 +5,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.notesapp2.domain.models.Note
 import com.example.notesapp2.domain.repositories.NoteRepository
+import kotlin.random.Random
 
 object NoteRepositoryImpl : NoteRepository {
     private val noteListLiveData = MutableLiveData<List<Note>>()
-    private val noteList = sortedSetOf<Note>({ o2, o1 ->
+    private val noteList = sortedSetOf<Note>({ o1, o2 ->
         o1.id.compareTo(o2.id)
     })
     private var autoId = 0L
 
+    init {
+        for (i in 0..10) {
+            val note = Note("$i","description $i",1)
+            createNote(note)
+        }
+
+    }
 
     override fun createNote(note: Note) {
         if (note.id == Note.UNDEFINED_ID) {
@@ -40,10 +48,10 @@ object NoteRepositoryImpl : NoteRepository {
     override fun getNoteItem(id: Long): Note {
         return noteList.find {
             it.id == id
-        }?: throw RuntimeException("Can't find note with id $id")
+        } ?: throw RuntimeException("Can't find note with id $id")
     }
 
-    private fun updateList(){
+    private fun updateList() {
         noteListLiveData.value = noteList.toList()
     }
 }

@@ -2,13 +2,14 @@ package com.example.notesapp2.presentation
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import com.example.notesapp2.data.repo.NoteRepositoryImpl
 import com.example.notesapp2.domain.models.Note
 import com.example.notesapp2.domain.usecases.DeleteNoteUseCase
 import com.example.notesapp2.domain.usecases.EditNoteUseCase
 import com.example.notesapp2.domain.usecases.GetNoteListUseCase
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
+class MainViewModel() : ViewModel() {
 
     private val repository = NoteRepositoryImpl
     private val getNoteListUseCase = GetNoteListUseCase(repository)
