@@ -5,10 +5,11 @@ data class Note(
     val title: String,
     val description: String,
     val priority: Int,
-    var id: Long = UNDEFINED_ID
+    var id: Long = UNDEFINED_ID,
+    var isPinned: Boolean = false
 
-){
-    companion object{
+) {
+    companion object {
         const val UNDEFINED_ID = -1L
     }
 }

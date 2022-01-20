@@ -19,5 +19,6 @@ class NoteApplication : Application() {
             NoteDatabase::class.java,
             "db"
         ).build()
+
     }
 }

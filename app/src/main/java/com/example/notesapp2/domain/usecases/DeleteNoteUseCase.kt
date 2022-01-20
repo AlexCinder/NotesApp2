@@ -6,6 +6,6 @@ import com.example.notesapp2.domain.repositories.NoteRepository
 class DeleteNoteUseCase(private val noteRepository: NoteRepository) {
 
     fun deleteNoteItem(note: Note) {
-        noteRepository.deleteNoteItem(note)
+        noteRepository.deleteNote(note)
     }
 }

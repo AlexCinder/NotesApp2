@@ -10,16 +10,24 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp2.R
 import com.example.notesapp2.domain.models.Note
 
-class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
+class NoteAdapter() :
+    RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
     var list = listOf<Note>()
         set(value) {
             field = value
             notifyDataSetChanged()
         }
+     var onClickListener : ((Note) -> Unit)? = null
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
+        val layout = when (viewType) {
+            EVEN -> R.layout.note_item_pinned
+            NOT_EVEN -> R.layout.note_item_unpinned
+            else -> R.layout.note_item_pinned
+        }
         val view = LayoutInflater.from(parent.context).inflate(
-            R.layout.note_item_pinned,
+            layout,
             parent,
             false
         )
@@ -27,12 +35,14 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
+
         val note = list[position]
-        holder.itemView.setOnClickListener {
-            Log.d("TAG", "onBindViewHolder: ")
-        }
         holder.apply {
-            tvTitle.text = note.title.toString()
+            itemView.setOnClickListener {
+                onClickListener?.invoke(note)
+            }
+
+            tvTitle.text = note.title
             tvDescription.text = note.description
             tvLastUpdate.text = ""
             when (note.priority) {
@@ -45,11 +55,28 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
     override fun getItemCount() = list.size
 
+    override fun getItemViewType(position: Int): Int {
+        val item = list[position]
+        return if ((item.id % 2) == 0L) {
+            EVEN
+        } else NOT_EVEN
+    }
+
     class NoteViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvTitle: TextView = view.findViewById(R.id.tv_title)
         val tvLastUpdate: TextView = view.findViewById(R.id.tv_last_update)
         val tvDescription: TextView = view.findViewById(R.id.tv_description)
 
+    }
 
+    interface OnNoteClick {
+
+        fun onNoteClick(note: Note)
+    }
+
+    companion object {
+        const val EVEN = 0
+        const val NOT_EVEN = 1
+        const val POOL_SIZE = 10
     }
 }

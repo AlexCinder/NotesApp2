@@ -15,7 +15,7 @@ object NoteRepositoryImpl : NoteRepository {
     private var autoId = 0L
 
     init {
-        for (i in 0..10) {
+        for (i in 0..100) {
             val note = Note("$i","description $i",1)
             createNote(note)
         }
@@ -31,12 +31,12 @@ object NoteRepositoryImpl : NoteRepository {
     }
 
     override fun editNote(note: Note) {
-        val oldNote = getNoteItem(note.id)
+        val oldNote = getNote(note.id)
         noteList.remove(oldNote)
         createNote(note)
     }
 
-    override fun deleteNoteItem(note: Note) {
+    override fun deleteNote(note: Note) {
         noteList.remove(note)
         updateList()
     }
@@ -45,7 +45,7 @@ object NoteRepositoryImpl : NoteRepository {
         return noteListLiveData
     }
 
-    override fun getNoteItem(id: Long): Note {
+    override fun getNote(id: Long): Note {
         return noteList.find {
             it.id == id
         } ?: throw RuntimeException("Can't find note with id $id")
