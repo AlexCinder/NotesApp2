@@ -4,8 +4,9 @@ data class Note(
 
     val title: String,
     val description: String,
-    val priority: Int,
+    var priority: Int = 1,
     var id: Long = UNDEFINED_ID,
+    var uri: String,
     var isPinned: Boolean = false
 
 ) {

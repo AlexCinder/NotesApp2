@@ -6,19 +6,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp2.R
 import com.example.notesapp2.domain.models.Note
+import com.example.notesapp2.presentation.utils.NoteDiffCallback
+import com.example.notesapp2.presentation.utils.NoteListDiffCallback
+import com.example.notesapp2.presentation.utils.NoteViewHolder
 
 class NoteAdapter() :
-    RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
-    var list = listOf<Note>()
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
-     var onClickListener : ((Note) -> Unit)? = null
+    ListAdapter<Note, NoteViewHolder>(NoteDiffCallback()) {
 
+    var onClickListener: ((Note) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         val layout = when (viewType) {
@@ -36,7 +36,7 @@ class NoteAdapter() :
 
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
 
-        val note = list[position]
+        val note = getItem(position)
         holder.apply {
             itemView.setOnClickListener {
                 onClickListener?.invoke(note)
@@ -53,26 +53,13 @@ class NoteAdapter() :
         }
     }
 
-    override fun getItemCount() = list.size
-
     override fun getItemViewType(position: Int): Int {
-        val item = list[position]
+        val item = getItem(position)
         return if ((item.id % 2) == 0L) {
             EVEN
         } else NOT_EVEN
     }
 
-    class NoteViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val tvTitle: TextView = view.findViewById(R.id.tv_title)
-        val tvLastUpdate: TextView = view.findViewById(R.id.tv_last_update)
-        val tvDescription: TextView = view.findViewById(R.id.tv_description)
-
-    }
-
-    interface OnNoteClick {
-
-        fun onNoteClick(note: Note)
-    }
 
     companion object {
         const val EVEN = 0

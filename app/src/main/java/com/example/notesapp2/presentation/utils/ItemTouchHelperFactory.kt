@@ -28,10 +28,9 @@ class ItemTouchHelperFactory(
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val note = noteAdapter.list[viewHolder.adapterPosition]
+                val note = noteAdapter.currentList[viewHolder.adapterPosition]
                 viewModel.deleteNote(note)
             }
-
         })
     }
 

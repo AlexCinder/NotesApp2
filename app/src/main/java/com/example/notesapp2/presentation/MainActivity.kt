@@ -16,10 +16,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        initRecyclerView()
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        initRecyclerView()
         viewModel.list.observe(this) {
-            noteAdapter.list = it
+            noteAdapter.submitList(it)
         }
     }
 
@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.rv)
         noteAdapter = NoteAdapter()
         noteAdapter.onClickListener = {
+            Log.d("TAG", "initRecyclerView: $it ")
         }
         with(recyclerView) {
             adapter = noteAdapter

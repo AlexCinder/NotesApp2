@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/list"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_format_list_bulleted_24"
+        android:title=""
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/location"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_my_location_24"
+        android:title=""
+        app:showAsAction="collapseActionView" />
+
+    <item
+        app:showAsAction="ifRoom"
+        android:id="@+id/camera"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_camera_alt_24"
+        android:title="" />
+
+    <item
+        app:showAsAction="ifRoom"
+        android:id="@+id/save"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_save_24"
+        android:title="" />
+
+</menu>
