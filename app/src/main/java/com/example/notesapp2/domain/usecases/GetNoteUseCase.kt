@@ -5,7 +5,7 @@ import com.example.notesapp2.domain.repositories.NoteRepository
 
 class GetNoteUseCase (private val noteRepository: NoteRepository){
 
-    fun getNoteItem(id: Long): Note {
+    fun getNote(id: Long): Note {
        return noteRepository.getNote(id)
     }
 }

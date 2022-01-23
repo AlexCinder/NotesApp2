@@ -6,11 +6,12 @@ data class Note(
     val description: String,
     var priority: Int = 1,
     var id: Long = UNDEFINED_ID,
-    var uri: String,
+    var uri: String = EMPTY_URI,
     var isPinned: Boolean = false
 
 ) {
     companion object {
         const val UNDEFINED_ID = -1L
+         const val EMPTY_URI = ""
     }
 }

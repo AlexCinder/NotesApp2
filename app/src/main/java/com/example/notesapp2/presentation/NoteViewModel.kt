@@ -1,8 +1,6 @@
 package com.example.notesapp2.presentation
 
-import android.app.Application
 import android.net.Uri
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,18 +13,26 @@ import com.example.notesapp2.domain.usecases.GetNoteUseCase
 class NoteViewModel : ViewModel() {
 
     private val repository = NoteRepositoryImpl
-    private val editNote = EditNoteUseCase(repository)
-    private val createNote = CreateNoteUseCase(repository)
-    private val getNote = GetNoteUseCase(repository)
+    private val editNoteUseCase = EditNoteUseCase(repository)
+    private val createNoteUseCase = CreateNoteUseCase(repository)
+    private val getNoteUseCase = GetNoteUseCase(repository)
+    private val _note = MutableLiveData<Note>()
+    val note: LiveData<Note>
+        get() = _note
+
     private val _error = MutableLiveData<Boolean>()
     val error: LiveData<Boolean>
         get() = _error
+
+    private val _finish = MutableLiveData<Unit>()
+    val finish: LiveData<Unit>
+        get() = _finish
 
     fun createNote(
         title: String?,
         description: String?,
         uri: Uri?,
-        priority: Int
+        priority: Int = 1
     ) {
         val noteTitle = parseTitle(title)
         val noteDescription = parseDescription(description)
@@ -34,16 +40,37 @@ class NoteViewModel : ViewModel() {
         val note = Note(noteTitle, noteDescription, priority, uri = noteUri)
         val valid = checkInput(noteTitle, noteDescription)
         if (valid) {
-            createNote.addNoteItem(note)
+            createNoteUseCase.createNote(note)
+            finishActivity()
         }
     }
 
-    fun editNote(note: Note) {
-        editNote.editNote(note)
+    fun editNote(
+        title: String?,
+        description: String?,
+        uri: Uri?,
+        priority: Int = 1
+    ) {
+        val noteTitle = parseTitle(title)
+        val noteDescription = parseDescription(description)
+        val noteUri = parseUri(uri)
+        val valid = checkInput(noteTitle, noteDescription)
+        if (valid) {
+            _note.value?.let {
+                val note = it.copy(
+                    title = noteTitle,
+                    description = noteDescription,
+                    uri = noteUri
+                )
+                editNoteUseCase.editNote(note)
+                finishActivity()
+            }
+        }
     }
 
     fun getNote(id: Long) {
-        val note = getNote.getNoteItem(id)
+        val note = getNoteUseCase.getNote(id)
+        _note.value = note
     }
 
     private fun parseTitle(title: String?): String {
@@ -66,5 +93,11 @@ class NoteViewModel : ViewModel() {
         return true
     }
 
+    private fun finishActivity() {
+        _finish.value = Unit
+    }
 
+    private fun resetError() {
+        _error.value = false
+    }
 }

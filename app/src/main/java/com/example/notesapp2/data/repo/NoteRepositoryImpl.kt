@@ -1,11 +1,9 @@
 package com.example.notesapp2.data.repo
 
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.notesapp2.domain.models.Note
 import com.example.notesapp2.domain.repositories.NoteRepository
-import kotlin.random.Random
 
 object NoteRepositoryImpl : NoteRepository {
     private val noteListLiveData = MutableLiveData<List<Note>>()
@@ -16,7 +14,7 @@ object NoteRepositoryImpl : NoteRepository {
 
     init {
         for (i in 0..100) {
-            val note = Note("$i","description $i",1)
+            val note = Note("$i","description $i")
             createNote(note)
         }
 

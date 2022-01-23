@@ -5,7 +5,7 @@ import com.example.notesapp2.domain.repositories.NoteRepository
 
 class CreateNoteUseCase(private val noteRepository: NoteRepository) {
 
-    fun addNoteItem(note: Note) {
+    fun createNote(note: Note) {
         noteRepository.createNote(note)
 
     }
