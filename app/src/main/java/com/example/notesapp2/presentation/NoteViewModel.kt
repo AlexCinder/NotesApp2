@@ -20,9 +20,9 @@ class NoteViewModel : ViewModel() {
     val note: LiveData<Note>
         get() = _note
 
-    private val _error = MutableLiveData<Boolean>()
-    val error: LiveData<Boolean>
-        get() = _error
+    private val _visibility = MutableLiveData<Boolean>()
+    val visibility: LiveData<Boolean>
+        get() = _visibility
 
     private val _finish = MutableLiveData<Unit>()
     val finish: LiveData<Unit>
@@ -71,6 +71,7 @@ class NoteViewModel : ViewModel() {
     fun getNote(id: Long) {
         val note = getNoteUseCase.getNote(id)
         _note.value = note
+        _visibility.value = note.uri.isNotBlank()
     }
 
     private fun parseTitle(title: String?): String {
@@ -87,7 +88,7 @@ class NoteViewModel : ViewModel() {
 
     private fun checkInput(title: String, description: String): Boolean {
         if (title.isBlank() || description.isBlank()) {
-            _error.value = true
+
             return false
         }
         return true
@@ -97,7 +98,4 @@ class NoteViewModel : ViewModel() {
         _finish.value = Unit
     }
 
-    private fun resetError() {
-        _error.value = false
-    }
 }

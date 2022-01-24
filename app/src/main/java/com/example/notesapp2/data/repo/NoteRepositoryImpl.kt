@@ -13,7 +13,7 @@ object NoteRepositoryImpl : NoteRepository {
     private var autoId = 0L
 
     init {
-        for (i in 0..100) {
+        for (i in 0..10) {
             val note = Note("$i","description $i")
             createNote(note)
         }

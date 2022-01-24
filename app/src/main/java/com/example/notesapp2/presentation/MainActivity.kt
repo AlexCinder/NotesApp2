@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity() {
         noteAdapter.onClickListener = {
             val intent = NoteActivity.newIntentEdit(this, it.id)
             startActivity(intent)
-            Log.d("TAG", "initRecyclerView: $it ")
         }
         with(binding.rv) {
             adapter = noteAdapter

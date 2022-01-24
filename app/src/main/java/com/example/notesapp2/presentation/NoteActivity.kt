@@ -3,66 +3,115 @@ package com.example.notesapp2.presentation
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.widget.Toast
-import android.widget.Toast.LENGTH_LONG
-import androidx.activity.result.ActivityResultLauncher
+import android.provider.DocumentsContract
+import android.util.Log
+import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.example.notesapp2.R
 import com.example.notesapp2.databinding.EditNoteBinding
 import com.example.notesapp2.domain.models.Note
-import com.example.notesapp2.domain.models.Note.Companion.EMPTY_URI
 
 class NoteActivity : AppCompatActivity() {
-    private lateinit var binding: EditNoteBinding
+
+    private val binding by lazy { EditNoteBinding.inflate(layoutInflater) }
     private lateinit var viewModel: NoteViewModel
     private var screenMode: String = ACTION_MODE_UNKNOWN
     private var noteId = Note.UNDEFINED_ID
-    private lateinit var searchImage: ActivityResultLauncher<Intent>
     private var uri: Uri? = null
+    private val getContent =
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { result: Uri? ->
+            uri = result
+            Log.d("TAG", "${uri?.toString()}")
+            binding.image.setImageURI(uri)
+            binding.llImage.visibility = View.VISIBLE
+            uri?.let {
+                contentResolver.takePersistableUriPermission(
+                    it,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = EditNoteBinding.inflate(layoutInflater)
         setContentView(binding.root)
         try {
             parseIntent()
         } catch (e: RuntimeException) {
             finish()
         }
+        initClickListeners()
         viewModel = ViewModelProvider(this)[NoteViewModel::class.java]
-        createBottomNavigationView()
         when (screenMode) {
             ACTION_MODE_ADD -> launchAddMode()
             ACTION_MODE_EDIT -> launchEditMode()
+        }
+        viewModel.finish.observe(this) {
+            finish()
+        }
+        viewModel.visibility.observe(this) {
+            if (it) {
+                binding.llImage.visibility = View.VISIBLE
+            } else binding.llImage.visibility = View.GONE
         }
 
 
     }
 
     private fun launchAddMode() {
-        viewModel.createNote(
-            binding.etTitle.text.toString(),
-            binding.etDescription.text.toString(),
-            uri
-        )
-
+        with(binding) {
+            ibSave.setOnClickListener {
+                viewModel.createNote(
+                    etTitle.text?.toString(),
+                    etDescription.text?.toString(),
+                    uri = uri
+                )
+            }
+        }
     }
 
     private fun launchEditMode() {
         with(viewModel) {
             getNote(noteId)
             note.observe(this@NoteActivity) {
-                binding.etTitle.setText(it.title)
-                binding.etDescription.setText(it.description)
-                binding.image.setImageURI(Uri.parse(it.uri))
-                //TODO(add priority and pinned features)
+                binding.apply {
+                    etTitle.setText(it.title)
+                    etDescription.setText(it.description)
+                    image.setImageURI(Uri.parse(it.uri))
+                }
+                uri = Uri.parse(it.uri)
+            }
+            with(binding) {
+                ibSave.setOnClickListener {
+                    Log.d("TAG", "launchEditMode: $uri")
+                    editNote(
+                        etTitle.text?.toString(),
+                        etDescription.text?.toString(),
+                        uri = uri
+                    )
+                }
+            }
+
+        }
+    }
+
+    private fun initClickListeners() {
+        with(binding) {
+            ibCamera.setOnClickListener {
+                getContent.launch(arrayOf(MIME_TYPE_IMAGE))
+            }
+            image.setOnLongClickListener {
+                image.setImageURI(null)
+                llImage.visibility = View.GONE
+                uri = null
+                true
             }
         }
-
-
     }
 
     private fun parseIntent() {
@@ -75,37 +124,15 @@ class NoteActivity : AppCompatActivity() {
 
     }
 
-    private fun createBottomNavigationView() {
-        binding.bottomNavigation.setOnItemSelectedListener {
-            when (it.itemId) {
-                LIST_ITEM -> {
-                    Toast.makeText(this, "list item", LENGTH_LONG).show()
-                    true
-                }
-                CAMERA_ITEM -> {
-                    Toast.makeText(this, "camera item", LENGTH_LONG).show()
-                    true
-                }
-                SAVE_ITEM -> {
-                    viewModel.finish.observe(this) {
-                        this@NoteActivity.finish()
-                    }
-                    true
-                }
-                LOCATION_ITEM -> {
-                    Toast.makeText(this, "location item", LENGTH_LONG).show()
-                    true
-                }
-                else -> false
 
-            }
-        }
+    private fun addImage() {
+
     }
 
 
     companion object {
         private const val ACTION_MODE_UNKNOWN = "unknown mode"
-        private const val CAMERA_ITEM = R.id.camera
+        private const val MIME_TYPE_IMAGE = "image/*"
         private const val SAVE_ITEM = R.id.save
         private const val LOCATION_ITEM = R.id.location
         private const val LIST_ITEM = R.id.list
@@ -127,9 +154,6 @@ class NoteActivity : AppCompatActivity() {
             return intent
         }
 
-        private fun newIntentAddImage(): Intent {
-            return Any() as Intent
-        }
 
     }
 }
