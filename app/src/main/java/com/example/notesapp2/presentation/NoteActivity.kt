@@ -20,8 +20,9 @@ class NoteActivity : AppCompatActivity() {
         } catch (e: RuntimeException) {
             finish()
         }
-        launchFragment()
-
+        if (savedInstanceState == null) {
+            launchFragment()
+        }
     }
 
     private fun launchFragment() {
@@ -32,7 +33,7 @@ class NoteActivity : AppCompatActivity() {
         }
         supportFragmentManager
             .beginTransaction()
-            .add(R.id.note_container, fragment)
+            .replace(R.id.note_container, fragment)
             .commit()
     }
 

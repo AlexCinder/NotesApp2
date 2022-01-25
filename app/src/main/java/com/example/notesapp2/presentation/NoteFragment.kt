@@ -10,13 +10,12 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.notesapp2.R
 import com.example.notesapp2.databinding.FragmentNoteBinding
-import com.example.notesapp2.domain.models.Note
 import com.example.notesapp2.domain.models.Note.Companion.UNDEFINED_ID
 
 class NoteFragment : Fragment() {
-    private val binding by lazy { FragmentNoteBinding.inflate(layoutInflater) }
+    private var _binding: FragmentNoteBinding? = null
+    private val binding get() = _binding!!
     private lateinit var viewModel: NoteViewModel
     private var screenMode: String = ACTION_MODE_UNKNOWN
     private var noteId = UNDEFINED_ID
@@ -36,6 +35,7 @@ class NoteFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("TAG", "onCreateFragment: ")
         parseArgs()
     }
 
@@ -43,9 +43,9 @@ class NoteFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_note, container, false)
-        return super.onCreateView(inflater, container, savedInstanceState)
+    ): View {
+        _binding = FragmentNoteBinding.inflate(inflater,container,false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,13 +68,20 @@ class NoteFragment : Fragment() {
 
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+        Log.d("TAG", "onDestroyView: ")
+
+    }
+
     private fun parseArgs() {
         val args = requireArguments()
         if (args.containsKey(MODE)) {
             screenMode = args.getString(MODE) ?: ACTION_MODE_UNKNOWN
             if (screenMode == ACTION_MODE_EDIT && args.containsKey(ID_FOR_EDIT)) {
                 noteId = args.getLong(ID_FOR_EDIT, UNDEFINED_ID)
-            } else throw RuntimeException("Empty id argument")
+            }
         } else throw RuntimeException("Empty arguments")
     }
 
