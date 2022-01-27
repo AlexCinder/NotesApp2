@@ -54,6 +54,7 @@
     </androidx.constraintlayout.widget.Guideline>
 
     <EditText
+        android:saveEnabled="true"
         android:id="@+id/et_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -92,6 +93,7 @@
             android:orientation="vertical">
 
             <EditText
+                android:saveEnabled="true"
                 android:id="@+id/et_description"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"

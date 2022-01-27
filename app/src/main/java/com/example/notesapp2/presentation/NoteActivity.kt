@@ -3,6 +3,7 @@ package com.example.notesapp2.presentation
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.notesapp2.R
 import com.example.notesapp2.domain.models.Note
@@ -14,6 +15,7 @@ class NoteActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("TAG", " NoteActivity onCreate: ")
         setContentView(R.layout.edit_note)
         try {
             parseIntent()
@@ -33,7 +35,7 @@ class NoteActivity : AppCompatActivity() {
         }
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.note_container, fragment)
+            .replace(R.id.note_item_container, fragment)
             .commit()
     }
 
@@ -67,5 +69,35 @@ class NoteActivity : AppCompatActivity() {
             return intent
         }
 
+    }
+    override fun onStart() {
+        super.onStart()
+        Log.d("TAG", " NoteActivity onStart: ")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("TAG", " NoteActivity onResume: ")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("TAG", " NoteActivity onPause: ")
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("TAG", " NoteActivity onStop: ")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("TAG", " NoteActivity onDestroy: ")
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.d("TAG", " NoteActivity onRestart: ")
     }
 }

@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     private var noteContainer: FragmentContainerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("TAG", " MainActivity onCreate: ")
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -36,11 +37,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun singleMode(): Boolean {
         return noteContainer == null
     }
-
 
     private fun launchFragment(fragment: Fragment) {
         supportFragmentManager.popBackStack()
@@ -77,4 +76,36 @@ class MainActivity : AppCompatActivity() {
         return ItemTouchHelperFactory(noteAdapter, viewModel)
             .createItemTouchHelper()
     }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d("TAG", " MainActivity onStart: ")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("TAG", " MainActivity onResume: ")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("TAG", " MainActivity onPause: ")
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("TAG", " MainActivity onStop: ")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("TAG", " MainActivity onDestroy: ")
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.d("TAG", " MainActivity onRestart: ")
+    }
+
 }

@@ -63,6 +63,7 @@ dependencies {
     def rx_java_version = '2.2.21'
     implementation "io.reactivex.rxjava2:rxandroid:$rx_android_version"
     implementation "io.reactivex.rxjava2:rxjava:$rx_java_version"
+
     //AAC
     def lifecycle_version = "2.3.1"
     def arch_version = "2.0.1"
