@@ -1,21 +1,15 @@
 package com.example.notesapp2.presentation
 
 import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp2.R
 import com.example.notesapp2.domain.models.Note
 import com.example.notesapp2.presentation.utils.NoteDiffCallback
-import com.example.notesapp2.presentation.utils.NoteListDiffCallback
 import com.example.notesapp2.presentation.utils.NoteViewHolder
 
-class NoteAdapter() :
+class NoteAdapter :
     ListAdapter<Note, NoteViewHolder>(NoteDiffCallback()) {
 
     var onClickListener: ((Note) -> Unit)? = null

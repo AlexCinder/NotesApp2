@@ -25,6 +25,7 @@ class NoteActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             launchFragment()
         }
+        Log.d("TAG", "NoteActivity savedInstanceState: ${savedInstanceState?.toString()} ")
     }
 
     private fun launchFragment() {
@@ -70,34 +71,34 @@ class NoteActivity : AppCompatActivity() {
         }
 
     }
-    override fun onStart() {
-        super.onStart()
-        Log.d("TAG", " NoteActivity onStart: ")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d("TAG", " NoteActivity onResume: ")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d("TAG", " NoteActivity onPause: ")
-
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d("TAG", " NoteActivity onStop: ")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("TAG", " NoteActivity onDestroy: ")
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        Log.d("TAG", " NoteActivity onRestart: ")
-    }
+//    override fun onStart() {
+//        super.onStart()
+//        Log.d("TAG", " NoteActivity onStart: ")
+//    }
+//
+//    override fun onResume() {
+//        super.onResume()
+//        Log.d("TAG", " NoteActivity onResume: ")
+//    }
+//
+//    override fun onPause() {
+//        super.onPause()
+//        Log.d("TAG", " NoteActivity onPause: ")
+//
+//    }
+//
+//    override fun onStop() {
+//        super.onStop()
+//        Log.d("TAG", " NoteActivity onStop: ")
+//    }
+//
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        Log.d("TAG", " NoteActivity onDestroy: ")
+//    }
+//
+//    override fun onRestart() {
+//        super.onRestart()
+//        Log.d("TAG", " NoteActivity onRestart: ")
+//    }
 }

@@ -12,7 +12,6 @@ import com.example.notesapp2.databinding.ActivityMainBinding
 import com.example.notesapp2.presentation.utils.ItemTouchHelperFactory
 
 class MainActivity : AppCompatActivity() {
-
     private lateinit var viewModel: MainViewModel
     private val noteAdapter: NoteAdapter by lazy { NoteAdapter() }
     private lateinit var binding: ActivityMainBinding
@@ -77,35 +76,38 @@ class MainActivity : AppCompatActivity() {
             .createItemTouchHelper()
     }
 
-    override fun onStart() {
-        super.onStart()
-        Log.d("TAG", " MainActivity onStart: ")
-    }
 
-    override fun onResume() {
-        super.onResume()
-        Log.d("TAG", " MainActivity onResume: ")
-    }
 
-    override fun onPause() {
-        super.onPause()
-        Log.d("TAG", " MainActivity onPause: ")
+//    override fun onStart() {
+//        super.onStart()
+//        Log.d("TAG", " MainActivity onStart: ")
+//    }
+//
+//    override fun onResume() {
+//        super.onResume()
+//        Log.d("TAG", " MainActivity onResume: ")
+//    }
+//
+//    override fun onPause() {
+//        super.onPause()
+//        Log.d("TAG", " MainActivity onPause: ")
+//
+//    }
+//
+//    override fun onStop() {
+//        super.onStop()
+//        Log.d("TAG", " MainActivity onStop: ")
+//    }
+//
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        Log.d("TAG", " MainActivity onDestroy: ")
+//    }
+//
+//    override fun onRestart() {
+//        super.onRestart()
+//        Log.d("TAG", " MainActivity onRestart: ")
+//    }
 
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d("TAG", " MainActivity onStop: ")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("TAG", " MainActivity onDestroy: ")
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        Log.d("TAG", " MainActivity onRestart: ")
-    }
 
 }

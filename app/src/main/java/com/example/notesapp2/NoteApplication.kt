@@ -14,11 +14,12 @@ class NoteApplication : Application() {
     }
 
     private fun createDatabase(){
-        db = Room.databaseBuilder(
-            applicationContext,
-            NoteDatabase::class.java,
-            "db"
-        ).build()
 
-    }
+            db = Room.databaseBuilder(
+                applicationContext,
+                NoteDatabase::class.java,
+                "db"
+            ).build()
+        }
+
 }

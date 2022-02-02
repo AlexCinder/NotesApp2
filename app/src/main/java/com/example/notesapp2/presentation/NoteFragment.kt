@@ -1,6 +1,5 @@
 package com.example.notesapp2.presentation
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -34,25 +33,24 @@ class NoteFragment : Fragment() {
             }
         }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Log.d("TAG", " Fragment onCreate: ")
         parseArgs()
+        Log.d("TAG", "onCreate: ${savedInstanceState.toString()}")
+        super.onCreate(savedInstanceState)
+//        Log.d("TAG", " Fragment onCreate: ")
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        Log.d("TAG", "onSaveInstanceState: ${outState.isEmpty}")
         super.onSaveInstanceState(outState)
-        Log.d("TAG", "onSaveInstanceState: ${outState.toString()}")
-
     }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        Log.d("TAG", " Fragment onCreateView: ")
+    ): View {
+//        Log.d("TAG", " Fragment onCreateView: ")
         _binding = FragmentNoteBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -61,7 +59,6 @@ class NoteFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d("TAG", " Fragment onViewCreated: ")
         initClickListeners()
-        Log.d("TAG", "onViewStateRestored: ${savedInstanceState.toString()}")
         viewModel = ViewModelProvider(this)[NoteViewModel::class.java]
         when (screenMode) {
             ACTION_MODE_ADD -> launchAddMode()
@@ -78,14 +75,14 @@ class NoteFragment : Fragment() {
     }
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        super.onViewStateRestored(savedInstanceState)
         Log.d("TAG", "onViewStateRestored: ${savedInstanceState.toString()}")
+        super.onViewStateRestored(savedInstanceState)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        Log.d("TAG", " Fragment onDestroyView: ")
+//        Log.d("TAG", " Fragment onDestroyView: ")
     }
 
     private fun parseArgs() {
@@ -111,6 +108,7 @@ class NoteFragment : Fragment() {
     }
 
     private fun launchEditMode() {
+
         with(viewModel) {
             getNote(noteId)
             note.observe(viewLifecycleOwner) {
@@ -130,7 +128,6 @@ class NoteFragment : Fragment() {
                     )
                 }
             }
-
         }
     }
 
@@ -147,7 +144,6 @@ class NoteFragment : Fragment() {
             }
         }
     }
-
 
     companion object {
 
@@ -176,39 +172,39 @@ class NoteFragment : Fragment() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d("TAG", " Fragment onResume: ")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d("TAG", " Fragment onPause: ")
-
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d("TAG", " Fragment onStop: ")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("TAG", " Fragment onDestroy: ")
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        Log.d("TAG", " Fragment onAttach: ")
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        Log.d("TAG", " Fragment onDetach: ")
-    }
+//    override fun onStart() {
+//        super.onStart()
+//    }
+//
+//    override fun onResume() {
+//        super.onResume()
+//        Log.d("TAG", " Fragment onResume: ")
+//    }
+//
+//    override fun onPause() {
+//        super.onPause()
+//        Log.d("TAG", " Fragment onPause: ")
+//
+//    }
+//
+//    override fun onStop() {
+//        super.onStop()
+//        Log.d("TAG", " Fragment onStop: ")
+//    }
+//
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        Log.d("TAG", " Fragment onDestroy: ")
+//    }
+//
+//    override fun onAttach(context: Context) {
+//        super.onAttach(context)
+//        Log.d("TAG", " Fragment onAttach: ")
+//    }
+//
+//    override fun onDetach() {
+//        super.onDetach()
+//        Log.d("TAG", " Fragment onDetach: ")
+//    }
 
 }

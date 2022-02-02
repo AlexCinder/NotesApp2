@@ -12,13 +12,13 @@ object NoteRepositoryImpl : NoteRepository {
     })
     private var autoId = 0L
 
-    init {
-        for (i in 0..10) {
-            val note = Note("$i","description $i")
-            createNote(note)
-        }
+//    init {
+//        for (i in 0..10) {
+//            val note = Note("$i","description $i")
+//            createNote(note)
+//        }
 
-    }
+//    }
 
     override fun createNote(note: Note) {
         if (note.id == Note.UNDEFINED_ID) {
