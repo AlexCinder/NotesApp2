@@ -17,7 +17,8 @@ import com.example.notesapp2.domain.models.Note.Companion.UNDEFINED_ID
 class NoteFragment : Fragment() {
     private var _binding: FragmentNoteBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: NoteViewModel
+    private val viewModel
+            by lazy { ViewModelProvider(this)[NoteViewModel::class.java] }
     private var screenMode: String = ACTION_MODE_UNKNOWN
     private var noteId = UNDEFINED_ID
     private var uri: Uri? = null
@@ -36,14 +37,9 @@ class NoteFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         parseArgs()
-        Log.d("TAG", "onCreate: ${savedInstanceState.toString()}")
+//        Log.d("TAG", "onCreate: ${savedInstanceState.toString()}")
         super.onCreate(savedInstanceState)
 //        Log.d("TAG", " Fragment onCreate: ")
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        Log.d("TAG", "onSaveInstanceState: ${outState.isEmpty}")
-        super.onSaveInstanceState(outState)
     }
 
     override fun onCreateView(
@@ -60,7 +56,6 @@ class NoteFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d("TAG", " Fragment onViewCreated: ")
         initClickListeners()
-        viewModel = ViewModelProvider(this)[NoteViewModel::class.java]
         when (screenMode) {
             ACTION_MODE_ADD -> launchAddMode()
             ACTION_MODE_EDIT -> launchEditMode()
@@ -75,10 +70,6 @@ class NoteFragment : Fragment() {
         }
     }
 
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        Log.d("TAG", "onViewStateRestored: ${savedInstanceState.toString()}")
-        super.onViewStateRestored(savedInstanceState)
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()
