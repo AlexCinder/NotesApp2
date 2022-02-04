@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.notesapp2.R
 import com.example.notesapp2.databinding.FragmentNoteBinding
 import com.example.notesapp2.domain.models.Note.Companion.UNDEFINED_ID
 
@@ -141,6 +142,12 @@ class NoteFragment : Fragment() {
                 llImage.visibility = View.GONE
                 uri = null
                 true
+            }
+            ibLocation.setOnClickListener {
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .addToBackStack(null)
+                    .add(R.id.note_item_container, MapsFragment())
+                    .commit()
             }
         }
     }
