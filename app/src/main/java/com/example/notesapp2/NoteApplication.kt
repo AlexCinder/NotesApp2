@@ -6,19 +6,8 @@ import com.example.notesapp2.data.db.NoteDatabase
 
 class NoteApplication : Application() {
 
-    private lateinit var _db: NoteDatabase
-
-    override fun onCreate() {
-        super.onCreate()
-        createDatabase()
-    }
-
-    fun getDataBase(): NoteDatabase {
-        return _db
-    }
-
-    private fun createDatabase() {
-        _db = Room.databaseBuilder(
+    val db by lazy {
+        Room.databaseBuilder(
             this,
             NoteDatabase::class.java,
             DB_NAME

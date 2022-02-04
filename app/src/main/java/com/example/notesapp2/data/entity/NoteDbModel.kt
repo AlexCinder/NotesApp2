@@ -7,7 +7,7 @@ import com.example.notesapp2.domain.models.Note
 @Entity(tableName = "note_items")
 data class NoteDbModel(
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    val id: Long,
     val title: String,
     val description: String,
     var priority: Int = 1,
