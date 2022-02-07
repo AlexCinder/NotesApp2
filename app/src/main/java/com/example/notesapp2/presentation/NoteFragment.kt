@@ -9,16 +9,22 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
+import com.example.notesapp2.NoteApplication
 import com.example.notesapp2.R
+import com.example.notesapp2.data.repo.NoteRepositoryImpl
 import com.example.notesapp2.databinding.FragmentNoteBinding
 import com.example.notesapp2.domain.models.Note.Companion.UNDEFINED_ID
+import com.example.notesapp2.presentation.utils.ViewModelFactory
 
 class NoteFragment : Fragment() {
     private var _binding: FragmentNoteBinding? = null
     private val binding get() = _binding!!
+    private val viewModelFactory
+            by lazy { ViewModelFactory((requireActivity().application as NoteApplication).getComponent()) }
     private val viewModel
-            by lazy { ViewModelProvider(this)[NoteViewModel::class.java] }
+            by lazy { ViewModelProvider(this, viewModelFactory)[NoteViewModel::class.java] }
     private var screenMode: String = ACTION_MODE_UNKNOWN
     private var noteId = UNDEFINED_ID
     private var uri: Uri? = null

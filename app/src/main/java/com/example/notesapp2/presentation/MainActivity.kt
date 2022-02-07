@@ -7,12 +7,20 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
+import com.example.notesapp2.NoteApplication
 import com.example.notesapp2.R
 import com.example.notesapp2.databinding.ActivityMainBinding
 import com.example.notesapp2.presentation.utils.ItemTouchHelperFactory
+import com.example.notesapp2.presentation.utils.ViewModelFactory
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var viewModel: MainViewModel
+
+    private val viewModelFactory
+            by lazy { ViewModelFactory((application as NoteApplication)
+                .getComponent().getRepository()) }
+    private val viewModel
+            by lazy { ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java] }
+
     private val noteAdapter: NoteAdapter by lazy { NoteAdapter() }
     private lateinit var binding: ActivityMainBinding
     private var noteContainer: FragmentContainerView? = null
@@ -23,7 +31,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         noteContainer = findViewById(R.id.note_item_container)
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         initRecyclerView()
         binding.fabAdd.setOnClickListener {
             if (singleMode()) {
@@ -75,7 +82,6 @@ class MainActivity : AppCompatActivity() {
         return ItemTouchHelperFactory(noteAdapter, viewModel)
             .createItemTouchHelper()
     }
-
 
 
 //    override fun onStart() {

@@ -9,9 +9,8 @@ import com.example.notesapp2.domain.usecases.DeleteNoteUseCase
 import com.example.notesapp2.domain.usecases.EditNoteUseCase
 import com.example.notesapp2.domain.usecases.GetNoteListUseCase
 
-class MainViewModel() : ViewModel() {
+class MainViewModel(repository: NoteRepositoryImpl) : ViewModel() {
 
-    private val repository = NoteRepositoryImpl
     private val getNoteListUseCase = GetNoteListUseCase(repository)
     private val editNoteUseCase = EditNoteUseCase(repository)
     private val deleteNoteUseCase = DeleteNoteUseCase(repository)

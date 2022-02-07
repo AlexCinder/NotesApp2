@@ -10,9 +10,8 @@ import com.example.notesapp2.domain.usecases.CreateNoteUseCase
 import com.example.notesapp2.domain.usecases.EditNoteUseCase
 import com.example.notesapp2.domain.usecases.GetNoteUseCase
 
-class NoteViewModel : ViewModel() {
+class NoteViewModel(repository: NoteRepositoryImpl) : ViewModel() {
 
-    private val repository = NoteRepositoryImpl
     private val editNoteUseCase = EditNoteUseCase(repository)
     private val createNoteUseCase = CreateNoteUseCase(repository)
     private val getNoteUseCase = GetNoteUseCase(repository)
@@ -37,7 +36,11 @@ class NoteViewModel : ViewModel() {
         val noteTitle = parseTitle(title)
         val noteDescription = parseDescription(description)
         val noteUri = parseUri(uri)
-        val note = Note(noteTitle, noteDescription, priority, uri = noteUri)
+        val note = Note(
+            title = noteTitle,
+            description = noteDescription, priority =
+            priority, uri = noteUri
+        )
         val valid = checkInput(noteTitle, noteDescription)
         if (valid) {
             createNoteUseCase.createNote(note)

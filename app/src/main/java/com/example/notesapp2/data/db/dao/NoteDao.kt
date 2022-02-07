@@ -1,4 +1,4 @@
-package com.example.notesapp2.data.dao
+package com.example.notesapp2.data.db.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
@@ -14,7 +14,7 @@ interface NoteDao {
     fun getNoteList(): LiveData<List<NoteDbModel>>
 
     @Insert(onConflict = REPLACE)
-    fun addNote(noteDbModel: NoteDbModel)
+    fun createNote(noteDbModel: NoteDbModel)
 
     @Query("DELETE FROM note_items WHERE id =:noteDbId")
     fun deleteNote(noteDbId: Long)

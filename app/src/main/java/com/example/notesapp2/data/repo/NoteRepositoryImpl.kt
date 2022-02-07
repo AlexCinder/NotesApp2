@@ -5,51 +5,27 @@ import androidx.lifecycle.MutableLiveData
 import com.example.notesapp2.domain.models.Note
 import com.example.notesapp2.domain.repositories.NoteRepository
 
-object NoteRepositoryImpl : NoteRepository {
-    private val noteListLiveData = MutableLiveData<List<Note>>()
-    private val noteList = sortedSetOf<Note>({ o1, o2 ->
-        o1.id.compareTo(o2.id)
-    })
-    private var autoId = 0L
-
-//    init {
-//        for (i in 0..10) {
-//            val note = Note("$i","description $i")
-//            createNote(note)
-//        }
-
-//    }
-
+class NoteRepositoryImpl(
+    private val localDataSource: NotesLocalDataSourceImpl
+) : NoteRepository {
     override fun createNote(note: Note) {
-        if (note.id == Note.UNDEFINED_ID) {
-            note.id = autoId++
-        }
-        noteList.add(note)
-        updateList()
+        localDataSource.createNote(note)
     }
 
     override fun editNote(note: Note) {
-        val oldNote = getNote(note.id)
-        noteList.remove(oldNote)
-        createNote(note)
+        localDataSource.editNote(note)
     }
 
     override fun deleteNote(note: Note) {
-        noteList.remove(note)
-        updateList()
+        localDataSource.deleteNote(note)
     }
 
     override fun getNoteList(): LiveData<List<Note>> {
-        return noteListLiveData
+        return localDataSource.getNoteList()
     }
 
     override fun getNote(id: Long): Note {
-        return noteList.find {
-            it.id == id
-        } ?: throw RuntimeException("Can't find note with id $id")
+        return localDataSource.getNote(id)
     }
 
-    private fun updateList() {
-        noteListLiveData.value = noteList.toList()
-    }
 }
