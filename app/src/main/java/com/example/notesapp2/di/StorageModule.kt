@@ -1,28 +1,24 @@
-package com.example.notesapp2
+package com.example.notesapp2.di
 
-import android.app.Application
+import android.content.Context
 import androidx.room.Room
 import com.example.notesapp2.data.db.NoteDatabase
 import com.example.notesapp2.data.mappers.NoteMapper
-import com.example.notesapp2.data.repo.NoteRepositoryImpl
 import com.example.notesapp2.data.repo.NotesLocalDataSourceImpl
 
-class AppComponent(application: Application) {
+class StorageModule(context: Context) {
 
     private val mapper = NoteMapper()
     private val database =
         Room.databaseBuilder(
-            application.applicationContext,
+            context,
             NoteDatabase::class.java,
             DB_NAME
         ).allowMainThreadQueries()
             .build()
+    private val localDataSourceImpl = NotesLocalDataSourceImpl(database.dao(), mapper)
 
-    private val dao = database.dao()
-    private val localDataSourceImpl = NotesLocalDataSourceImpl(dao, mapper)
-    private val repository = NoteRepositoryImpl(localDataSourceImpl)
-
-    fun getRepository() = repository
+    fun getLocalDataSourceImpl() = localDataSourceImpl
 
     companion object {
         private const val DB_NAME = "notes.db"

@@ -1,6 +1,7 @@
 package com.example.notesapp2
 
 import android.app.Application
+import com.example.notesapp2.di.AppComponent
 
 class NoteApplication : Application() {
 

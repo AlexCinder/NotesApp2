@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.example.notesapp2.NoteApplication
 import com.example.notesapp2.R
 import com.example.notesapp2.data.repo.NoteRepositoryImpl
@@ -21,17 +22,28 @@ import com.example.notesapp2.presentation.utils.ViewModelFactory
 class NoteFragment : Fragment() {
     private var _binding: FragmentNoteBinding? = null
     private val binding get() = _binding!!
-    private val viewModelFactory
-            by lazy { ViewModelFactory((requireActivity().application as NoteApplication).getComponent()) }
-    private val viewModel
-            by lazy { ViewModelProvider(this, viewModelFactory)[NoteViewModel::class.java] }
+    private val viewModelFactory by lazy {
+        ViewModelFactory(
+            (requireActivity().application as NoteApplication)
+                .getComponent().getRepository()
+        )
+    }
+    private val viewModel by lazy {
+        ViewModelProvider(
+            this,
+            viewModelFactory
+        )[NoteViewModel::class.java]
+    }
     private var screenMode: String = ACTION_MODE_UNKNOWN
     private var noteId = UNDEFINED_ID
     private var uri: Uri? = null
     private val getContent =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { result: Uri? ->
             uri = result
-            binding.image.setImageURI(uri)
+            Glide
+                .with(this)
+                .load(uri)
+                .into(binding.image)
             binding.llImage.visibility = View.VISIBLE
             uri?.let {
                 activity?.contentResolver?.takePersistableUriPermission(
@@ -43,9 +55,7 @@ class NoteFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         parseArgs()
-//        Log.d("TAG", "onCreate: ${savedInstanceState.toString()}")
         super.onCreate(savedInstanceState)
-//        Log.d("TAG", " Fragment onCreate: ")
     }
 
     override fun onCreateView(
@@ -53,7 +63,6 @@ class NoteFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-//        Log.d("TAG", " Fragment onCreateView: ")
         _binding = FragmentNoteBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -80,7 +89,6 @@ class NoteFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-//        Log.d("TAG", " Fragment onDestroyView: ")
     }
 
     private fun parseArgs() {

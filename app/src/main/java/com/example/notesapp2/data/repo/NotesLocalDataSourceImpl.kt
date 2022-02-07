@@ -1,7 +1,6 @@
 package com.example.notesapp2.data.repo
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Transformations
 import com.example.notesapp2.data.db.dao.NoteDao
 import com.example.notesapp2.data.mappers.NoteMapper

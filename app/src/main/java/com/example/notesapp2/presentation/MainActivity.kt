@@ -16,10 +16,18 @@ import com.example.notesapp2.presentation.utils.ViewModelFactory
 class MainActivity : AppCompatActivity() {
 
     private val viewModelFactory
-            by lazy { ViewModelFactory((application as NoteApplication)
-                .getComponent().getRepository()) }
-    private val viewModel
-            by lazy { ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java] }
+            by lazy {
+                ViewModelFactory(
+                    (application as NoteApplication)
+                        .getComponent().getRepository()
+                )
+            }
+    private val viewModel by lazy {
+        ViewModelProvider(
+            this,
+            viewModelFactory
+        )[MainViewModel::class.java]
+    }
 
     private val noteAdapter: NoteAdapter by lazy { NoteAdapter() }
     private lateinit var binding: ActivityMainBinding
@@ -82,38 +90,4 @@ class MainActivity : AppCompatActivity() {
         return ItemTouchHelperFactory(noteAdapter, viewModel)
             .createItemTouchHelper()
     }
-
-
-//    override fun onStart() {
-//        super.onStart()
-//        Log.d("TAG", " MainActivity onStart: ")
-//    }
-//
-//    override fun onResume() {
-//        super.onResume()
-//        Log.d("TAG", " MainActivity onResume: ")
-//    }
-//
-//    override fun onPause() {
-//        super.onPause()
-//        Log.d("TAG", " MainActivity onPause: ")
-//
-//    }
-//
-//    override fun onStop() {
-//        super.onStop()
-//        Log.d("TAG", " MainActivity onStop: ")
-//    }
-//
-//    override fun onDestroy() {
-//        super.onDestroy()
-//        Log.d("TAG", " MainActivity onDestroy: ")
-//    }
-//
-//    override fun onRestart() {
-//        super.onRestart()
-//        Log.d("TAG", " MainActivity onRestart: ")
-//    }
-
-
 }

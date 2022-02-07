@@ -1,16 +1,17 @@
 package com.example.notesapp2.presentation
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.notesapp2.data.repo.NoteRepositoryImpl
 import com.example.notesapp2.domain.models.Note
+import com.example.notesapp2.domain.repositories.NoteRepository
 import com.example.notesapp2.domain.usecases.CreateNoteUseCase
 import com.example.notesapp2.domain.usecases.EditNoteUseCase
 import com.example.notesapp2.domain.usecases.GetNoteUseCase
 
-class NoteViewModel(repository: NoteRepositoryImpl) : ViewModel() {
+class NoteViewModel(repository: NoteRepository) : ViewModel() {
 
     private val editNoteUseCase = EditNoteUseCase(repository)
     private val createNoteUseCase = CreateNoteUseCase(repository)
@@ -38,8 +39,9 @@ class NoteViewModel(repository: NoteRepositoryImpl) : ViewModel() {
         val noteUri = parseUri(uri)
         val note = Note(
             title = noteTitle,
-            description = noteDescription, priority =
-            priority, uri = noteUri
+            description = noteDescription,
+            priority = priority,
+            uri = noteUri
         )
         val valid = checkInput(noteTitle, noteDescription)
         if (valid) {
@@ -99,6 +101,11 @@ class NoteViewModel(repository: NoteRepositoryImpl) : ViewModel() {
 
     private fun finishActivity() {
         _finish.value = Unit
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.d("TAG", "onCleared: $this")
     }
 
 }
