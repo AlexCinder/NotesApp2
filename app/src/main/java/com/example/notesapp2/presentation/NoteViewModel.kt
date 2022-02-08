@@ -10,9 +10,16 @@ import com.example.notesapp2.domain.repositories.NoteRepository
 import com.example.notesapp2.domain.usecases.CreateNoteUseCase
 import com.example.notesapp2.domain.usecases.EditNoteUseCase
 import com.example.notesapp2.domain.usecases.GetNoteUseCase
+import io.reactivex.Completable
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.Callable
 
 class NoteViewModel(repository: NoteRepository) : ViewModel() {
 
+    private val compositeDisposable = CompositeDisposable()
     private val editNoteUseCase = EditNoteUseCase(repository)
     private val createNoteUseCase = CreateNoteUseCase(repository)
     private val getNoteUseCase = GetNoteUseCase(repository)
@@ -45,8 +52,17 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
         )
         val valid = checkInput(noteTitle, noteDescription)
         if (valid) {
-            createNoteUseCase.createNote(note)
-            finishActivity()
+            compositeDisposable.add(Completable.fromAction {
+                Log.d("TAG", "Thread:${Thread.currentThread().name} ")
+                createNoteUseCase.createNote(note)
+            }.subscribeOn(Schedulers.io())
+                .subscribe({
+                    Log.d("TAG", "Thread:${Thread.currentThread().name} ")
+                    finishActivity()
+                }, {
+                    Log.d("TAG", "createNote: $it")
+                }
+                ))
         }
     }
 
@@ -62,22 +78,42 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
         val valid = checkInput(noteTitle, noteDescription)
         if (valid) {
             _note.value?.let {
-                val note = it.copy(
-                    title = noteTitle,
-                    description = noteDescription,
-                    priority = priority,
-                    uri = noteUri,
+                compositeDisposable.add(
+                    Completable.fromAction {
+                        val note = it.copy(
+                            title = noteTitle,
+                            description = noteDescription,
+                            priority = priority,
+                            uri = noteUri,
+                        )
+                        editNoteUseCase.editNote(note)
+                    }.subscribeOn(Schedulers.io())
+                        .subscribe({
+                            Log.d("TAG", "Thread:${Thread.currentThread().name} ")
+                            finishActivity()
+                        }, {
+                            Log.d("TAG", "editNote:$it ")
+                        })
                 )
-                editNoteUseCase.editNote(note)
-                finishActivity()
             }
         }
     }
 
-    fun getNote(id: Long) {
+    fun getNote(id: Long): Note {
+        compositeDisposable.add(
+            Completable.fromCallable {
+                Log.d("TAG", "getNote: ${Thread.currentThread().name}")
+                getNoteUseCase.getNote(id)
+            }.subscribeOn(Schedulers.io())
+                .subscribe({
+                },{
+                    Log.d("TAG", "getNote: $it")
+                })
+        )
         val note = getNoteUseCase.getNote(id)
-        _note.value = note
-        _visibility.value = note.uri.isNotBlank()
+        _note.postValue(note)
+        _visibility.postValue(note.uri.isNotBlank())
+        return note
     }
 
     private fun parseTitle(title: String?): String {
@@ -101,11 +137,12 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
     }
 
     private fun finishActivity() {
-        _finish.value = Unit
+        _finish.postValue(Unit)
     }
 
     override fun onCleared() {
         super.onCleared()
+        compositeDisposable.dispose()
         Log.d("TAG", "onCleared: $this")
     }
 

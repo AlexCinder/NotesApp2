@@ -2,11 +2,13 @@ package com.example.notesapp2.presentation
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.notesapp2.domain.models.Note
 import com.example.notesapp2.domain.repositories.NoteRepository
 import com.example.notesapp2.domain.usecases.DeleteNoteUseCase
 import com.example.notesapp2.domain.usecases.EditNoteUseCase
 import com.example.notesapp2.domain.usecases.GetNoteListUseCase
+import kotlinx.coroutines.launch
 
 class MainViewModel(repository: NoteRepository) : ViewModel() {
 
@@ -17,7 +19,9 @@ class MainViewModel(repository: NoteRepository) : ViewModel() {
     val list = getNoteListUseCase.getNoteList()
 
     fun deleteNote(note: Note) {
-        deleteNoteUseCase.deleteNoteItem(note)
+        viewModelScope.launch {
+            deleteNoteUseCase.deleteNoteItem(note)
+        }
     }
 
     fun editNote(note: Note) {

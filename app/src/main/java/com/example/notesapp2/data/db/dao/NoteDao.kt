@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy.REPLACE
 import androidx.room.Query
 import com.example.notesapp2.data.entity.NoteDbModel
+import io.reactivex.Completable
 
 @Dao
 interface NoteDao {

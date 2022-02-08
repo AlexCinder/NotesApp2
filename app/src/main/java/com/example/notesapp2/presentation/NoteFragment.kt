@@ -120,15 +120,14 @@ class NoteFragment : Fragment() {
     private fun launchEditMode() {
 
         with(viewModel) {
-            getNote(noteId)
-            note.observe(viewLifecycleOwner) {
-                binding.apply {
-                    etTitle.setText(it.title)
-                    etDescription.setText(it.description)
-                    image.setImageURI(Uri.parse(it.uri))
-                }
-                uri = Uri.parse(it.uri)
+            val note = getNote(noteId)
+            binding.apply {
+                etTitle.setText(note.title)
+                etDescription.setText(note.description)
+                image.setImageURI(Uri.parse(note.uri))
             }
+            uri = Uri.parse(note.uri)
+
             with(binding) {
                 ibSave.setOnClickListener {
                     editNote(
