@@ -71,7 +71,6 @@ class NoteFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("TAG", " Fragment onViewCreated: ")
         initMenu()
         initClickListeners()
         when (screenMode) {
@@ -120,14 +119,14 @@ class NoteFragment : Fragment() {
     private fun launchEditMode() {
 
         with(viewModel) {
-            val note = getNote(noteId)
-            binding.apply {
-                etTitle.setText(note.title)
-                etDescription.setText(note.description)
-                image.setImageURI(Uri.parse(note.uri))
+            getNote(noteId) {
+                Log.d("TAG", "getNote: ${Thread.currentThread().name}")
+                binding.etTitle.setText(it.title)
+                binding.etDescription.setText(it.description)
+                binding.image.setImageURI(Uri.parse(it.uri))
+                uri = Uri.parse(it.uri)
+                priority = it.priority
             }
-            uri = Uri.parse(note.uri)
-
             with(binding) {
                 ibSave.setOnClickListener {
                     editNote(
@@ -170,7 +169,7 @@ class NoteFragment : Fragment() {
         menu.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.low_priority -> {
-                    priority = 1
+                    priority = 3
                     true
                 }
                 R.id.medium_priority -> {
@@ -178,7 +177,7 @@ class NoteFragment : Fragment() {
                     true
                 }
                 R.id.high_priority -> {
-                    priority = 3
+                    priority = 1
                     true
                 }
                 else -> false

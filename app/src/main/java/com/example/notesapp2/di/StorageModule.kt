@@ -14,8 +14,7 @@ class StorageModule(context: Context) {
             context,
             NoteDatabase::class.java,
             DB_NAME
-        ).allowMainThreadQueries()
-            .build()
+        ).build()
     private val localDataSourceImpl = NotesLocalDataSourceImpl(database.dao(), mapper)
 
     fun getLocalDataSourceImpl() = localDataSourceImpl

@@ -14,8 +14,9 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.Action
+import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
-import java.util.concurrent.Callable
 
 class NoteViewModel(repository: NoteRepository) : ViewModel() {
 
@@ -80,13 +81,16 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
             _note.value?.let {
                 compositeDisposable.add(
                     Completable.fromAction {
-                        val note = it.copy(
-                            title = noteTitle,
-                            description = noteDescription,
-                            priority = priority,
-                            uri = noteUri,
-                        )
-                        editNoteUseCase.editNote(note)
+                        Action {
+                            val note = it.copy(
+                                title = noteTitle,
+                                description = noteDescription,
+                                priority = priority,
+                                uri = noteUri,
+                            )
+                            Log.d("TAG", "inside :${Thread.currentThread().name} ")
+                            editNoteUseCase.editNote(note)
+                        }.run()
                     }.subscribeOn(Schedulers.io())
                         .subscribe({
                             Log.d("TAG", "Thread:${Thread.currentThread().name} ")
@@ -99,21 +103,21 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
         }
     }
 
-    fun getNote(id: Long): Note {
+    fun getNote(id: Long,consumer: Consumer<Note>) {
         compositeDisposable.add(
-            Completable.fromCallable {
+            Single.fromCallable {
                 Log.d("TAG", "getNote: ${Thread.currentThread().name}")
-                getNoteUseCase.getNote(id)
+               val note = getNoteUseCase.getNote(id)
+                _note.postValue(note)
+                _visibility.postValue(note.uri.isNotBlank())
+                return@fromCallable note
             }.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
+                    consumer.accept(it)
                 },{
-                    Log.d("TAG", "getNote: $it")
                 })
         )
-        val note = getNoteUseCase.getNote(id)
-        _note.postValue(note)
-        _visibility.postValue(note.uri.isNotBlank())
-        return note
     }
 
     private fun parseTitle(title: String?): String {
