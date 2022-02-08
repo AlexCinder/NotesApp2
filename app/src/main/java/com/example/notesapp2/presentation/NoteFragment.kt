@@ -8,18 +8,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.notesapp2.NoteApplication
 import com.example.notesapp2.R
-import com.example.notesapp2.data.repo.NoteRepositoryImpl
 import com.example.notesapp2.databinding.FragmentNoteBinding
 import com.example.notesapp2.domain.models.Note.Companion.UNDEFINED_ID
 import com.example.notesapp2.presentation.utils.ViewModelFactory
 
 class NoteFragment : Fragment() {
+
+    private lateinit var menu: PopupMenu
+    private var priority = NONE
     private var _binding: FragmentNoteBinding? = null
     private val binding get() = _binding!!
     private val viewModelFactory by lazy {
@@ -70,6 +72,7 @@ class NoteFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d("TAG", " Fragment onViewCreated: ")
+        initMenu()
         initClickListeners()
         when (screenMode) {
             ACTION_MODE_ADD -> launchAddMode()
@@ -107,7 +110,8 @@ class NoteFragment : Fragment() {
                 viewModel.createNote(
                     etTitle.text?.toString(),
                     etDescription.text?.toString(),
-                    uri = uri
+                    uri = uri,
+                    priority = priority
                 )
             }
         }
@@ -130,7 +134,8 @@ class NoteFragment : Fragment() {
                     editNote(
                         etTitle.text?.toString(),
                         etDescription.text?.toString(),
-                        uri = uri
+                        uri = uri,
+                        priority = priority
                     )
                 }
             }
@@ -154,6 +159,31 @@ class NoteFragment : Fragment() {
                     .add(R.id.note_item_container, MapsFragment())
                     .commit()
             }
+            ibChoice.setOnClickListener {
+                menu.show()
+            }
+        }
+    }
+
+    private fun initMenu() {
+        menu = PopupMenu(this.requireContext(), binding.ibChoice)
+        menu.inflate(R.menu.menu)
+        menu.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.low_priority -> {
+                    priority = 1
+                    true
+                }
+                R.id.medium_priority -> {
+                    priority = 2
+                    true
+                }
+                R.id.high_priority -> {
+                    priority = 3
+                    true
+                }
+                else -> false
+            }
         }
     }
 
@@ -165,6 +195,7 @@ class NoteFragment : Fragment() {
         private const val ACTION_MODE_EDIT = "edit"
         private const val ID_FOR_EDIT = "id"
         private const val MODE = "mode"
+        private const val NONE = 0
 
         fun newInstanceAddFragment(): NoteFragment {
             return NoteFragment().apply {

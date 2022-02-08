@@ -32,7 +32,7 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
         title: String?,
         description: String?,
         uri: Uri?,
-        priority: Int = 1
+        priority: Int
     ) {
         val noteTitle = parseTitle(title)
         val noteDescription = parseDescription(description)
@@ -54,7 +54,7 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
         title: String?,
         description: String?,
         uri: Uri?,
-        priority: Int = 1
+        priority: Int
     ) {
         val noteTitle = parseTitle(title)
         val noteDescription = parseDescription(description)
@@ -65,7 +65,8 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
                 val note = it.copy(
                     title = noteTitle,
                     description = noteDescription,
-                    uri = noteUri
+                    priority = priority,
+                    uri = noteUri,
                 )
                 editNoteUseCase.editNote(note)
                 finishActivity()

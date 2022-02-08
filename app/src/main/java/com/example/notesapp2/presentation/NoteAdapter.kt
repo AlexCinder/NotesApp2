@@ -42,7 +42,8 @@ class NoteAdapter :
             when (note.priority) {
                 1 -> tvTitle.setTextColor(Color.RED)
                 2 -> tvTitle.setTextColor(Color.YELLOW)
-                else -> tvTitle.setTextColor(Color.GREEN)
+                3 -> tvTitle.setTextColor(Color.GREEN)
+                else -> tvTitle.setTextColor(Color.GRAY)
             }
         }
     }
