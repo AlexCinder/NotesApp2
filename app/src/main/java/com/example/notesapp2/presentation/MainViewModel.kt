@@ -26,7 +26,11 @@ class MainViewModel(repository: NoteRepository) : ViewModel() {
             Completable.fromAction {
                 deleteNoteUseCase.deleteNoteItem(note)
             }.subscribeOn(Schedulers.io())
-                .subscribe()
+                .subscribe({
+
+                },{
+                    Log.d("TAG", "deleteNote: $it")
+                })
         )
     }
 

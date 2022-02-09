@@ -54,11 +54,9 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
         val valid = checkInput(noteTitle, noteDescription)
         if (valid) {
             compositeDisposable.add(Completable.fromAction {
-                Log.d("TAG", "Thread:${Thread.currentThread().name} ")
                 createNoteUseCase.createNote(note)
             }.subscribeOn(Schedulers.io())
                 .subscribe({
-                    Log.d("TAG", "Thread:${Thread.currentThread().name} ")
                     finishActivity()
                 }, {
                     Log.d("TAG", "createNote: $it")
@@ -88,12 +86,10 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
                                 priority = priority,
                                 uri = noteUri,
                             )
-                            Log.d("TAG", "inside :${Thread.currentThread().name} ")
                             editNoteUseCase.editNote(note)
                         }.run()
                     }.subscribeOn(Schedulers.io())
                         .subscribe({
-                            Log.d("TAG", "Thread:${Thread.currentThread().name} ")
                             finishActivity()
                         }, {
                             Log.d("TAG", "editNote:$it ")
@@ -106,7 +102,6 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
     fun getNote(id: Long,consumer: Consumer<Note>) {
         compositeDisposable.add(
             Single.fromCallable {
-                Log.d("TAG", "getNote: ${Thread.currentThread().name}")
                val note = getNoteUseCase.getNote(id)
                 _note.postValue(note)
                 _visibility.postValue(note.uri.isNotBlank())
@@ -116,6 +111,7 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
                 .subscribe({
                     consumer.accept(it)
                 },{
+                    Log.d("TAG", "onError: $it")
                 })
         )
     }

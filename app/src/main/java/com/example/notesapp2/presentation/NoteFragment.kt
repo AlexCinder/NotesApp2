@@ -42,10 +42,7 @@ class NoteFragment : Fragment() {
     private val getContent =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { result: Uri? ->
             uri = result
-            Glide
-                .with(this)
-                .load(uri)
-                .into(binding.image)
+            loadImage(uri.toString())
             binding.llImage.visibility = View.VISIBLE
             uri?.let {
                 activity?.contentResolver?.takePersistableUriPermission(
@@ -123,7 +120,7 @@ class NoteFragment : Fragment() {
                 Log.d("TAG", "getNote: ${Thread.currentThread().name}")
                 binding.etTitle.setText(it.title)
                 binding.etDescription.setText(it.description)
-                binding.image.setImageURI(Uri.parse(it.uri))
+                loadImage(it.uri)
                 uri = Uri.parse(it.uri)
                 priority = it.priority
             }
@@ -161,6 +158,14 @@ class NoteFragment : Fragment() {
                 menu.show()
             }
         }
+    }
+
+    private fun loadImage(url:String){
+        Glide
+            .with(this)
+            .load(url)
+            .centerCrop()
+            .into(binding.image)
     }
 
     private fun initMenu() {
