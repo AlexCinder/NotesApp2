@@ -63,6 +63,7 @@ class NoteFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentNoteBinding.inflate(inflater, container, false)
+        viewModel.getNote(noteId)
         return binding.root
     }
 
@@ -116,7 +117,7 @@ class NoteFragment : Fragment() {
     private fun launchEditMode() {
 
         with(viewModel) {
-            getNote(noteId) {
+            note.observe(viewLifecycleOwner){
                 Log.d("TAG", "getNote: ${Thread.currentThread().name}")
                 binding.etTitle.setText(it.title)
                 binding.etDescription.setText(it.description)

@@ -99,18 +99,19 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
         }
     }
 
-    fun getNote(id: Long,consumer: Consumer<Note>) {
+    fun getNote(id: Long) {
         compositeDisposable.add(
-            Single.fromCallable {
-               val note = getNoteUseCase.getNote(id)
-                _note.postValue(note)
-                _visibility.postValue(note.uri.isNotBlank())
-                return@fromCallable note
+            Completable.fromAction {
+                Action {
+                    val note = getNoteUseCase.getNote(id)
+                    _note.postValue(note)
+                    _visibility.postValue(note.uri.isNotBlank())
+                }.run()
             }.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+//                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    consumer.accept(it)
-                },{
+
+                }, {
                     Log.d("TAG", "onError: $it")
                 })
         )
