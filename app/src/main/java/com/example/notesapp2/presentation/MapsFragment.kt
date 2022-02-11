@@ -27,9 +27,17 @@ class MapsFragment : Fragment() {
          * install it inside the SupportMapFragment. This method will only be triggered once the
          * user has installed Google Play services and returned to the app.
          */
-        val sydney = LatLng(-34.0, 151.0)
-        googleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        val sydney = LatLng(-50.0, 151.0)
+        with(googleMap) {
+            addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
+            moveCamera(CameraUpdateFactory.newLatLng(sydney))
+            mapType = GoogleMap.MAP_TYPE_SATELLITE
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        parseArgs()
+        super.onCreate(savedInstanceState)
     }
 
     override fun onCreateView(
@@ -44,5 +52,9 @@ class MapsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
+    }
+
+    private fun parseArgs() {
+
     }
 }

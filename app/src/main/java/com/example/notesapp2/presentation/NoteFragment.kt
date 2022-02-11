@@ -1,14 +1,28 @@
 package com.example.notesapp2.presentation
 
+import android.Manifest.*
+import android.Manifest.permission.*
+import android.annotation.SuppressLint
+import android.content.Context.LOCATION_SERVICE
 import android.content.Intent
+import android.content.Intent.*
+import android.content.pm.PackageManager
+import android.content.pm.PackageManager.*
+import android.graphics.Color
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
@@ -17,9 +31,15 @@ import com.example.notesapp2.R
 import com.example.notesapp2.databinding.FragmentNoteBinding
 import com.example.notesapp2.domain.models.Note.Companion.UNDEFINED_ID
 import com.example.notesapp2.presentation.utils.ViewModelFactory
+import com.google.android.material.snackbar.Snackbar
 
 class NoteFragment : Fragment() {
 
+    private val requestPermission =
+        registerForActivityResult(
+            RequestPermission(),
+            ::onGotLocationsPermissions
+        )
     private lateinit var menu: PopupMenu
     private var priority = NONE
     private var _binding: FragmentNoteBinding? = null
@@ -39,21 +59,14 @@ class NoteFragment : Fragment() {
     private var screenMode: String = ACTION_MODE_UNKNOWN
     private var noteId = UNDEFINED_ID
     private var uri: Uri? = null
-    private val getContent =
-        registerForActivityResult(ActivityResultContracts.OpenDocument()) { result: Uri? ->
-            uri = result
-            loadImage(uri.toString())
-            binding.llImage.visibility = View.VISIBLE
-            uri?.let {
-                activity?.contentResolver?.takePersistableUriPermission(
-                    it,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-            }
-        }
+    private val getImageFromLibrary =
+        registerForActivityResult(OpenDocument(), ::pickImage)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         parseArgs()
+        if (noteId != UNDEFINED_ID) {
+            viewModel.getNote(noteId)
+        }
         super.onCreate(savedInstanceState)
     }
 
@@ -63,7 +76,6 @@ class NoteFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentNoteBinding.inflate(inflater, container, false)
-        viewModel.getNote(noteId)
         return binding.root
     }
 
@@ -117,8 +129,7 @@ class NoteFragment : Fragment() {
     private fun launchEditMode() {
 
         with(viewModel) {
-            note.observe(viewLifecycleOwner){
-                Log.d("TAG", "getNote: ${Thread.currentThread().name}")
+            note.observe(viewLifecycleOwner) {
                 binding.etTitle.setText(it.title)
                 binding.etDescription.setText(it.description)
                 loadImage(it.uri)
@@ -138,10 +149,38 @@ class NoteFragment : Fragment() {
         }
     }
 
+    private fun onGotLocationsPermissions(granted: Boolean) {
+        if (granted) {
+            getCurrentLocation()
+            launchMap()
+        }
+    }
+
+    private fun pickImage(result: Uri?) {
+        if (result != null) {
+            uri = result
+            loadImage(uri.toString())
+            binding.llImage.visibility = View.VISIBLE
+            uri?.let {
+                requireActivity().contentResolver.takePersistableUriPermission(
+                    it,
+                    FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+        }
+    }
+
+    private fun launchMap() {
+        requireActivity().supportFragmentManager.beginTransaction()
+            .addToBackStack(null)
+            .add(R.id.note_item_container, MapsFragment())
+            .commit()
+    }
+
     private fun initClickListeners() {
         with(binding) {
             ibCamera.setOnClickListener {
-                getContent.launch(arrayOf(MIME_TYPE_IMAGE))
+                getImageFromLibrary.launch(arrayOf(MIME_TYPE_IMAGE))
             }
             image.setOnLongClickListener {
                 image.setImageURI(null)
@@ -150,10 +189,7 @@ class NoteFragment : Fragment() {
                 true
             }
             ibLocation.setOnClickListener {
-                requireActivity().supportFragmentManager.beginTransaction()
-                    .addToBackStack(null)
-                    .add(R.id.note_item_container, MapsFragment())
-                    .commit()
+                checkPermissions()
             }
             ibChoice.setOnClickListener {
                 menu.show()
@@ -161,7 +197,7 @@ class NoteFragment : Fragment() {
         }
     }
 
-    private fun loadImage(url:String){
+    private fun loadImage(url: String) {
         Glide
             .with(this)
             .load(url)
@@ -189,6 +225,68 @@ class NoteFragment : Fragment() {
                 else -> false
             }
         }
+    }
+
+    private fun checkPermissions() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                ACCESS_FINE_LOCATION
+            ) == PERMISSION_GRANTED -> {
+                getCurrentLocation()
+                launchMap()
+            }
+            shouldShowRequestPermissionRationale(ACCESS_FINE_LOCATION) -> {
+                showDialog()
+            }
+            else -> {
+                requestPermission.launch(ACCESS_FINE_LOCATION)
+            }
+        }
+
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getCurrentLocation() {
+        val manager = context?.getSystemService(LOCATION_SERVICE) as LocationManager
+        val listener = LocationListener { p0 -> showLocation(p0) }
+        manager.requestLocationUpdates(
+            LocationManager.GPS_PROVIDER,
+            1000L,
+            10f,
+            listener,
+            Looper.getMainLooper()
+        )
+    }
+
+    private fun showDialog() {
+        Snackbar
+            .make(
+                requireActivity()
+                    .findViewById(R.id.ll_bottom),
+                "Cannot access to location, because of lack permissions",
+                Snackbar.LENGTH_LONG,
+            )
+            .setBackgroundTint(Color.BLACK)
+            .setTextColor(Color.WHITE)
+            .setAction("Go to settings") {
+                val intent = Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.fromParts("package", requireActivity().packageName, null)
+                )
+                if (requireActivity().packageManager.resolveActivity(
+                        intent, MATCH_DEFAULT_ONLY
+                    ) != null
+                ) {
+                    startActivity(intent)
+                }
+            }
+            .setActionTextColor(Color.WHITE)
+            .show()
+    }
+
+    private fun showLocation(location: Location?) {
+        Log.d("TAG", "showLocation: ${location?.latitude} ${location?.longitude}")
     }
 
     companion object {

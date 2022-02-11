@@ -101,18 +101,15 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
 
     fun getNote(id: Long) {
         compositeDisposable.add(
-            Completable.fromAction {
-                Action {
-                    val note = getNoteUseCase.getNote(id)
-                    _note.postValue(note)
-                    _visibility.postValue(note.uri.isNotBlank())
-                }.run()
+            Single.fromCallable {
+                getNoteUseCase.getNote(id)
             }.subscribeOn(Schedulers.io())
 //                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-
-                }, {
-                    Log.d("TAG", "onError: $it")
+                .subscribe({ note ->
+                    _note.postValue(note)
+                    _visibility.postValue(note.uri.isNotBlank())
+                }, { throwable ->
+                    Log.d("TAG", "onError: $throwable")
                 })
         )
     }
@@ -131,7 +128,6 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
 
     private fun checkInput(title: String, description: String): Boolean {
         if (title.isBlank() || description.isBlank()) {
-
             return false
         }
         return true
