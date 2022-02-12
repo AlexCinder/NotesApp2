@@ -151,7 +151,7 @@ class NoteFragment : Fragment() {
 
     private fun onGotLocationsPermissions(granted: Boolean) {
         if (granted) {
-            getCurrentLocation()
+//            getCurrentLocation()
             launchMap()
         }
     }
@@ -233,7 +233,7 @@ class NoteFragment : Fragment() {
                 requireContext(),
                 ACCESS_FINE_LOCATION
             ) == PERMISSION_GRANTED -> {
-                getCurrentLocation()
+//                getCurrentLocation()
                 launchMap()
             }
             shouldShowRequestPermissionRationale(ACCESS_FINE_LOCATION) -> {
@@ -264,7 +264,7 @@ class NoteFragment : Fragment() {
             .make(
                 requireActivity()
                     .findViewById(R.id.ll_bottom),
-                "Cannot access to location, because of lack permissions",
+                "Cannot access to location",
                 Snackbar.LENGTH_LONG,
             )
             .setBackgroundTint(Color.BLACK)
