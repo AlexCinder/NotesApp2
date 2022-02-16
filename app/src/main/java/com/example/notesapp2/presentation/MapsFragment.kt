@@ -24,10 +24,13 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
+import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit.*
 
 const val TAG = "TAG"
+
 class MapsFragment : Fragment() {
+    private var flag = false
     private lateinit var map: GoogleMap
     private var listOfLatLng = arrayListOf<LatLng>()
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
@@ -36,25 +39,18 @@ class MapsFragment : Fragment() {
 
     @SuppressLint("MissingPermission")
     private val callback = OnMapReadyCallback { googleMap ->
-        /**
-         * Manipulates the map once available.
-         * This callback is triggered when the map is ready to be used.
-         * This is where we can add markers or lines, add listeners or move the camera.
-         * In this case, we just add a marker near Sydney, Australia.
-         * If Google Play services is not installed on the device, the user will be prompted to
-         * install it inside the SupportMapFragment. This method will only be triggered once the
-         * user has installed Google Play services and returned to the app.
-         */
-
-
-        with(googleMap) {
-
+        map = googleMap
+        createLocationRequest()
+        createLocationCallback()
+        createFusedProvider()
+        with(map) {
             val task = fusedLocationProviderClient.lastLocation
             task.addOnFailureListener {
                 Log.d("error", ": $it")
             }
             task.addOnSuccessListener {
                 if (it != null) {
+                    Log.d(TAG, "lastLocation: ")
                     val currentLocation = LatLng(it.latitude, it.longitude)
                     animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
                 }
@@ -65,8 +61,12 @@ class MapsFragment : Fragment() {
                 isZoomControlsEnabled = true
                 isRotateGesturesEnabled = true
             }
-            map = googleMap
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY,flag)
+        super.onSaveInstanceState(outState)
     }
 
 
@@ -83,9 +83,6 @@ class MapsFragment : Fragment() {
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
-        createLocationRequest()
-        createLocationCallback()
-        createFusedProvider()
     }
 
     @SuppressLint("MissingPermission")
@@ -96,7 +93,6 @@ class MapsFragment : Fragment() {
             locationCallback,
             Looper.getMainLooper()
         )
-
     }
 
     private fun createLocationRequest() {
@@ -109,52 +105,60 @@ class MapsFragment : Fragment() {
         }
     }
 
-    private fun createLocationCallback() {
+    override fun onDestroy() {
+        super.onDestroy()
+        map.uiSettings.isMyLocationButtonEnabled = false
+        Log.d(TAG, "onDestroy: 111")
+    }
 
+    private fun createLocationCallback() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
-
+//                for (location in locationResult.locations){
+//                    Log.d(TAG, "onLocationResult: ${locationResult.locations.size}")
+//                    Log.d(TAG, "onLocationResult: ${location.latitude} ${location.longitude}")
+//                }
                 saveLocation(locationResult)
-//                Log.d("TAG", "Thread :${Thread.currentThread().name} ")
-//                Log.d(
-//                    "TAG",
-//                    "onLocationResult: ${locationResult.lastLocation.longitude} ${locationResult.lastLocation.latitude}"
-//                )
-
             }
         }
     }
 
     private fun saveLocation(locationResult: LocationResult) {
         map.clear()
-        val lat = locationResult.lastLocation.latitude
-        val lng = locationResult.lastLocation.longitude
+        val lastLocation = locationResult.lastLocation
+        val lat = lastLocation.latitude
+        val lng = lastLocation.longitude
         val timestamp = locationResult.lastLocation.time
         val latLng = LatLng(lat, lng)
         listOfLatLng.add(latLng)
-        val polyline = PolylineOptions().color(Color.BLUE).width(5f)
+        val polyline = PolylineOptions()
+            .color(Color.BLUE)
+            .width(POLYLINE_WIDTH)
         for (i in listOfLatLng.indices) {
             polyline.add(listOfLatLng[i])
         }
         map.addPolyline(polyline)
         map.moveCamera(CameraUpdateFactory.newLatLng(latLng))
-        map.addMarker(MarkerOptions().position(latLng))
     }
 
-    private fun checkPermissions() {
-
+    override fun onStop() {
+        super.onStop()
+        removeLocationUpdates()
+        Log.d(TAG, "onStopReceiveUpdates: ")
     }
 
-    override fun onDestroyView() {
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback).addOnCompleteListener {
-            Log.d("end", "onDestroyView: $fusedLocationProviderClient")
-        }
-        super.onDestroyView()
+    private fun removeLocationUpdates() {
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback)
+            .addOnCompleteListener {
+                Log.d("end", "onDestroyView: $fusedLocationProviderClient")
+            }
     }
 
 
     private companion object {
+        const val REQUESTING_LOCATION_UPDATES_KEY = "request key"
+        const val POLYLINE_WIDTH = 5f
         const val MAX_WAIT_TIME = 2L
         const val FASTEST_INTERVAL = 30L
         const val INTERVAL = 100L
