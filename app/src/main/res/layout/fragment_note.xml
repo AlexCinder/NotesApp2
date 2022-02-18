@@ -9,22 +9,22 @@
     tools:context=".presentation.NoteFragment">
 
     <FrameLayout
-        app:layout_constraintEnd_toEndOf="parent"
-        android:background="@color/black"
         android:id="@+id/priority_choice"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/black"
         android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@id/et_title"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:layout_gravity="right"
-            app:backgroundTint="@color/black"
             android:id="@+id/ib_choice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_baseline_priority_high_24" />
+            android:layout_gravity="right"
+            android:src="@drawable/ic_baseline_priority_high_24"
+            app:backgroundTint="@color/black" />
     </FrameLayout>
 
     <LinearLayout
@@ -72,13 +72,12 @@
     </androidx.constraintlayout.widget.Guideline>
 
     <EditText
-        android:saveEnabled="true"
         android:id="@+id/et_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-
         android:layout_marginEnd="8dp"
+
         android:background="@android:drawable/editbox_background"
         android:ems="10"
         android:fontFamily="casual"
@@ -86,6 +85,7 @@
         android:inputType="textPersonName"
         android:minHeight="48dp"
         android:padding="8dp"
+        android:saveEnabled="true"
         android:textAlignment="textStart"
         android:textColor="@color/black"
         android:textColorHighlight="@android:color/black"
@@ -95,41 +95,37 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/priority_choice" />
 
-    <ScrollView
+    <androidx.fragment.app.FragmentContainerView
+        android:layout_margin="8dp"
+        android:id="@+id/map_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/ll_bottom"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/et_description"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/et_description"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="8dp"
+        android:layout_weight="1"
+        android:background="@android:drawable/editbox_background"
+        android:ems="10"
+        android:fontFamily="casual"
+        android:hint="@string/description"
+        android:inputType="textMultiLine"
+        android:padding="8dp"
+        android:saveEnabled="true"
+        android:textColor="@color/black"
+        android:textColorHighlight="@color/white"
+        android:textColorHint="@color/black"
+        android:textColorLink="@android:color/transparent"
+        android:textCursorDrawable="@color/black"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ll_image">
+        app:layout_constraintTop_toBottomOf="@id/et_title" />
 
-        <LinearLayout
-
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <EditText
-
-                android:saveEnabled="true"
-                android:id="@+id/et_description"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:background="@android:drawable/editbox_background"
-                android:ems="10"
-                android:fontFamily="casual"
-                android:hint="@string/description"
-                android:inputType="textMultiLine"
-                android:padding="8dp"
-                android:textColor="@color/black"
-                android:textColorHighlight="@color/white"
-                android:textColorHint="@color/black"
-                android:textColorLink="@android:color/transparent"
-                android:textCursorDrawable="@color/black" />
-        </LinearLayout>
-    </ScrollView>
 
     <LinearLayout
         android:id="@+id/ll_bottom"
@@ -140,49 +136,49 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <ImageButton
-            app:backgroundTint="@color/black"
             android:id="@+id/ib_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            app:backgroundTint="@color/black"
             app:srcCompat="@drawable/ic_baseline_arrow_back_24"
             app:tint="@color/white" />
 
         <ImageButton
-            app:backgroundTint="@color/black"
-            app:tint="@color/white"
             android:id="@+id/ib_flag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:srcCompat="@drawable/ic_baseline_flag_24" />
+            app:backgroundTint="@color/black"
+            app:srcCompat="@drawable/ic_baseline_flag_24"
+            app:tint="@color/white" />
 
         <ImageButton
-            app:backgroundTint="@color/black"
-            app:tint="@color/white"
             android:id="@+id/ib_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:srcCompat="@drawable/ic_baseline_my_location_24" />
+            app:backgroundTint="@color/black"
+            app:srcCompat="@drawable/ic_baseline_my_location_24"
+            app:tint="@color/white" />
 
         <ImageButton
-            app:backgroundTint="@color/black"
-            app:tint="@color/white"
             android:id="@+id/ib_camera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:srcCompat="@drawable/ic_baseline_camera_alt_24" />
+            app:backgroundTint="@color/black"
+            app:srcCompat="@drawable/ic_baseline_camera_alt_24"
+            app:tint="@color/white" />
 
         <ImageButton
-            app:backgroundTint="@color/black"
-            app:tint="@color/white"
             android:id="@+id/ib_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:srcCompat="@drawable/ic_baseline_save_24" />
+            app:backgroundTint="@color/black"
+            app:srcCompat="@drawable/ic_baseline_save_24"
+            app:tint="@color/white" />
     </LinearLayout>
 
 

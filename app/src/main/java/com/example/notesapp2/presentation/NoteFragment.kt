@@ -1,26 +1,21 @@
 package com.example.notesapp2.presentation
 
-import android.Manifest.*
-import android.Manifest.permission.*
-import android.annotation.SuppressLint
-import android.content.Context.LOCATION_SERVICE
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Intent
-import android.content.Intent.*
-import android.content.pm.PackageManager
-import android.content.pm.PackageManager.*
+import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+import android.content.pm.PackageManager.MATCH_DEFAULT_ONLY
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.graphics.Color
 import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
-import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts.*
+import androidx.activity.result.contract.ActivityResultContracts.OpenDocument
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -31,9 +26,10 @@ import com.example.notesapp2.R
 import com.example.notesapp2.databinding.FragmentNoteBinding
 import com.example.notesapp2.domain.models.Note.Companion.UNDEFINED_ID
 import com.example.notesapp2.presentation.utils.ViewModelFactory
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
 
-class NoteFragment : Fragment() {
+class NoteFragment : Fragment(), MapsFragment.SavePolylineRootListener {
 
     private val requestPermission =
         registerForActivityResult(
@@ -127,7 +123,6 @@ class NoteFragment : Fragment() {
     }
 
     private fun launchEditMode() {
-
         with(viewModel) {
             note.observe(viewLifecycleOwner) {
                 binding.etTitle.setText(it.title)
@@ -170,10 +165,12 @@ class NoteFragment : Fragment() {
         }
     }
 
+
     private fun launchMap() {
-        requireActivity().supportFragmentManager.beginTransaction()
+        binding.mapContainer.visibility = View.VISIBLE
+        childFragmentManager.beginTransaction()
             .addToBackStack(null)
-            .add(R.id.note_item_container, MapsFragment())
+            .add(R.id.map_container, MapsFragment())
             .commit()
     }
 
@@ -243,20 +240,6 @@ class NoteFragment : Fragment() {
                 requestPermission.launch(ACCESS_FINE_LOCATION)
             }
         }
-
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun getCurrentLocation() {
-        val manager = context?.getSystemService(LOCATION_SERVICE) as LocationManager
-        val listener = LocationListener { p0 -> showLocation(p0) }
-        manager.requestLocationUpdates(
-            LocationManager.GPS_PROVIDER,
-            1000L,
-            10f,
-            listener,
-            Looper.getMainLooper()
-        )
     }
 
     private fun showDialog() {
@@ -285,10 +268,6 @@ class NoteFragment : Fragment() {
             .show()
     }
 
-    private fun showLocation(location: Location?) {
-        Log.d("TAG", "showLocation: ${location?.latitude} ${location?.longitude}")
-    }
-
     companion object {
 
         private const val ACTION_MODE_UNKNOWN = "unknown mode"
@@ -315,6 +294,10 @@ class NoteFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun savePolyline(list: List<LatLng>) {
+        Log.d(TAG, "savePolyline: 1488")
     }
 
 //    override fun onStart() {

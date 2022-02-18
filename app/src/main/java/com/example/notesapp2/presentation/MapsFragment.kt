@@ -22,10 +22,9 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
-import java.lang.ref.WeakReference
-import java.util.concurrent.TimeUnit.*
+import java.util.concurrent.TimeUnit.MINUTES
+import java.util.concurrent.TimeUnit.SECONDS
 
 const val TAG = "TAG"
 
@@ -35,7 +34,8 @@ class MapsFragment : Fragment() {
     private var listOfLatLng = arrayListOf<LatLng>()
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
-    private lateinit var locationCallback: LocationCallback
+    private lateinit var locationCallback: NotLeakingLocationCallback
+    private lateinit var savePolylineRootListener: SavePolylineRootListener
 
     @SuppressLint("MissingPermission")
     private val callback = OnMapReadyCallback { googleMap ->
@@ -43,16 +43,19 @@ class MapsFragment : Fragment() {
         createLocationRequest()
         createLocationCallback()
         createFusedProvider()
+        startUpdates()
         with(map) {
             val task = fusedLocationProviderClient.lastLocation
-            task.addOnFailureListener {
-                Log.d("error", ": $it")
-            }
-            task.addOnSuccessListener {
-                if (it != null) {
-                    Log.d(TAG, "lastLocation: ")
-                    val currentLocation = LatLng(it.latitude, it.longitude)
-                    animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+            with(task) {
+                addOnFailureListener {
+                    Log.d("error", ": $it")
+                }
+                addOnSuccessListener {
+                    if (it != null) {
+                        Log.d(TAG, "lastLocation: ")
+                        val currentLocation = LatLng(it.latitude, it.longitude)
+                        animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+                    }
                 }
             }
             isMyLocationEnabled = true
@@ -65,10 +68,9 @@ class MapsFragment : Fragment() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY,flag)
+        outState.putParcelableArrayList(POLYLINE_STATE, listOfLatLng)
         super.onSaveInstanceState(outState)
     }
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -80,14 +82,45 @@ class MapsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        parentFragment?.let { castParentFragment(it) }
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
     }
 
-    @SuppressLint("MissingPermission")
     private fun createFusedProvider() {
         fusedLocationProviderClient = getFusedLocationProviderClient(requireActivity())
+    }
+
+    private fun castParentFragment(fragment: Fragment) {
+        if (fragment is SavePolylineRootListener) {
+            savePolylineRootListener = fragment
+        } else throw ClassCastException("Parent fragment implements SavePolylineRootListener")
+    }
+
+    private fun createLocationRequest() {
+        locationRequest = create().apply {
+            interval = SECONDS.toMillis(INTERVAL)
+//            fastestInterval = SECONDS.toMillis(FASTEST_INTERVAL)
+            maxWaitTime = MINUTES.toMillis(MAX_WAIT_TIME)
+            priority = PRIORITY_HIGH_ACCURACY
+            smallestDisplacement = MINIMUM_DISTANCE
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (flag) {
+            startUpdates()
+        }
+    }
+
+    private fun createLocationCallback() {
+        locationCallback = NotLeakingLocationCallback(::saveLocation)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startUpdates() {
         fusedLocationProviderClient.requestLocationUpdates(
             locationRequest,
             locationCallback,
@@ -95,37 +128,13 @@ class MapsFragment : Fragment() {
         )
     }
 
-    private fun createLocationRequest() {
-        locationRequest = create().apply {
-            interval = SECONDS.toMillis(INTERVAL)
-//            fastestInterval = SECONDS.toMillis(FASTEST_INTERVAL)
-//            maxWaitTime = MINUTES.toMillis(MAX_WAIT_TIME)
-            priority = PRIORITY_HIGH_ACCURACY
-            smallestDisplacement = MINIMUM_DISTANCE
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        map.uiSettings.isMyLocationButtonEnabled = false
-        Log.d(TAG, "onDestroy: 111")
-    }
-
-    private fun createLocationCallback() {
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                super.onLocationResult(locationResult)
-//                for (location in locationResult.locations){
-//                    Log.d(TAG, "onLocationResult: ${locationResult.locations.size}")
-//                    Log.d(TAG, "onLocationResult: ${location.latitude} ${location.longitude}")
-//                }
-                saveLocation(locationResult)
-            }
-        }
+    interface SavePolylineRootListener {
+        fun savePolyline(list: List<LatLng>)
     }
 
     private fun saveLocation(locationResult: LocationResult) {
         map.clear()
+        Log.d(TAG, "saveLocation: 111")
         val lastLocation = locationResult.lastLocation
         val lat = lastLocation.latitude
         val lng = lastLocation.longitude
@@ -140,6 +149,23 @@ class MapsFragment : Fragment() {
         }
         map.addPolyline(polyline)
         map.moveCamera(CameraUpdateFactory.newLatLng(latLng))
+        savePolylineRootListener.savePolyline(listOfLatLng)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        if (savedInstanceState != null) {
+            listOfLatLng =
+                savedInstanceState.getParcelableArrayList<LatLng>(POLYLINE_STATE)
+                        as ArrayList<LatLng>
+        }
+        super.onCreate(savedInstanceState)
+
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        locationCallback.release()
+        map.uiSettings.isMyLocationButtonEnabled = false
     }
 
     override fun onStop() {
@@ -153,11 +179,15 @@ class MapsFragment : Fragment() {
             .addOnCompleteListener {
                 Log.d("end", "onDestroyView: $fusedLocationProviderClient")
             }
+            .addOnFailureListener { throwable ->
+                Log.d(TAG, "removeLocationUpdates: $throwable")
+            }
+        flag = true
     }
 
 
     private companion object {
-        const val REQUESTING_LOCATION_UPDATES_KEY = "request key"
+        const val POLYLINE_STATE = "polyline state"
         const val POLYLINE_WIDTH = 5f
         const val MAX_WAIT_TIME = 2L
         const val FASTEST_INTERVAL = 30L
@@ -165,4 +195,17 @@ class MapsFragment : Fragment() {
         const val MINIMUM_DISTANCE = 1f
     }
 
+}
+
+class NotLeakingLocationCallback(
+    private var callback: ((LocationResult) -> Unit)? = null
+) : LocationCallback() {
+    override fun onLocationResult(p0: LocationResult) {
+        super.onLocationResult(p0)
+        callback?.invoke(p0)
+    }
+
+    fun release() {
+        callback = null
+    }
 }
