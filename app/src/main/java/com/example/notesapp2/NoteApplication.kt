@@ -11,6 +11,5 @@ class NoteApplication : Application() {
         super.onCreate()
         component = AppComponent(this)
     }
-
     fun getComponent() = component
 }

@@ -1,21 +1,26 @@
 package com.example.notesapp2.presentation
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.Manifest.*
+import android.Manifest.permission.*
+import android.annotation.SuppressLint
+import android.content.Context.LOCATION_SERVICE
 import android.content.Intent
-import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
-import android.content.pm.PackageManager.MATCH_DEFAULT_ONLY
-import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.content.Intent.*
+import android.content.pm.PackageManager
+import android.content.pm.PackageManager.*
 import android.graphics.Color
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts.OpenDocument
-import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -28,6 +33,10 @@ import com.example.notesapp2.domain.models.Note.Companion.UNDEFINED_ID
 import com.example.notesapp2.presentation.utils.ViewModelFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
+import java.util.*
 
 class NoteFragment : Fragment(), MapsFragment.SavePolylineRootListener {
 
@@ -56,7 +65,7 @@ class NoteFragment : Fragment(), MapsFragment.SavePolylineRootListener {
     private var noteId = UNDEFINED_ID
     private var uri: Uri? = null
     private val getImageFromLibrary =
-        registerForActivityResult(OpenDocument(), ::pickImage)
+        registerForActivityResult(GetContent(), ::pickImage)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         parseArgs()
@@ -123,6 +132,7 @@ class NoteFragment : Fragment(), MapsFragment.SavePolylineRootListener {
     }
 
     private fun launchEditMode() {
+
         with(viewModel) {
             note.observe(viewLifecycleOwner) {
                 binding.etTitle.setText(it.title)
@@ -154,14 +164,15 @@ class NoteFragment : Fragment(), MapsFragment.SavePolylineRootListener {
     private fun pickImage(result: Uri?) {
         if (result != null) {
             uri = result
-            loadImage(uri.toString())
+            loadImageToStorage(result,UUID.randomUUID().toString())
+//            loadImage(uri.toString())
             binding.llImage.visibility = View.VISIBLE
-            uri?.let {
-                requireActivity().contentResolver.takePersistableUriPermission(
-                    it,
-                    FLAG_GRANT_READ_URI_PERMISSION
-                )
-            }
+//            uri?.let {
+//                requireActivity().contentResolver.takePersistableUriPermission(
+//                    it,
+//                    FLAG_GRANT_READ_URI_PERMISSION
+//                )
+//            }
         }
     }
 
@@ -174,10 +185,49 @@ class NoteFragment : Fragment(), MapsFragment.SavePolylineRootListener {
             .commit()
     }
 
+    private fun loadImageToStorage(uri: Uri, fileName: String) {
+        val bitmap = getBitmapFromUri(uri)
+        var fos: FileOutputStream? = null
+        try {
+            if (bitmap == null) {
+                Toast.makeText(requireActivity(), "Can't save image", Toast.LENGTH_SHORT)
+                    .show()
+                return
+            } else {
+                fos = context?.openFileOutput("$fileName.jpg", Context.MODE_PRIVATE)
+                fos.use {
+                    (bitmap.compress(Bitmap.CompressFormat.JPEG, 60, it))
+                }
+            }
+        } catch (e: FileNotFoundException) {
+            Log.d(TAG, "FileNotFoundException: $e")
+        } catch (e: IOException) {
+            Log.d(TAG, "IOException:$e")
+        } finally {
+            try {
+                fos?.close()
+            } catch (e: IOException) {
+                Log.d(TAG, "IOException:$e ")
+            }
+        }
+    }
+
+    private fun getBitmapFromUri(uri: Uri): Bitmap? {
+        val resolver = requireContext().contentResolver
+        var bitmap: Bitmap? = null
+        try {
+            val decoder = ImageDecoder.createSource(resolver, uri)
+            bitmap = ImageDecoder.decodeBitmap(decoder)
+        } catch (e: Exception) {
+            Log.d(TAG, "Exception: $e")
+        }
+        return bitmap
+    }
+
     private fun initClickListeners() {
         with(binding) {
             ibCamera.setOnClickListener {
-                getImageFromLibrary.launch(arrayOf(MIME_TYPE_IMAGE))
+                getImageFromLibrary.launch(MIME_TYPE_IMAGE)
             }
             image.setOnLongClickListener {
                 image.setImageURI(null)
@@ -240,6 +290,9 @@ class NoteFragment : Fragment(), MapsFragment.SavePolylineRootListener {
                 requestPermission.launch(ACCESS_FINE_LOCATION)
             }
         }
+
+    }
+
     }
 
     private fun showDialog() {
@@ -268,8 +321,9 @@ class NoteFragment : Fragment(), MapsFragment.SavePolylineRootListener {
             .show()
     }
 
-    companion object {
 
+    companion object {
+        private const val IMAGE_DIR = "image"
         private const val ACTION_MODE_UNKNOWN = "unknown mode"
         private const val MIME_TYPE_IMAGE = "image/*"
         private const val ACTION_MODE_ADD = "add"
