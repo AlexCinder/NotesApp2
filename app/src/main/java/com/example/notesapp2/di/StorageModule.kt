@@ -9,6 +9,7 @@ import com.example.notesapp2.data.repo.NotesLocalDataSourceImpl
 class StorageModule(context: Context) {
 
     private val mapper = NoteMapper()
+    
     private val database =
         Room.databaseBuilder(
             context,
