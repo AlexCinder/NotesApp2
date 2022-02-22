@@ -1,25 +1,21 @@
 package com.example.notesapp2.presentation
 
-import android.Manifest.*
 import android.Manifest.permission.*
-import android.annotation.SuppressLint
-import android.content.Context.LOCATION_SERVICE
+import android.content.Context
 import android.content.Intent
 import android.content.Intent.*
-import android.content.pm.PackageManager
 import android.content.pm.PackageManager.*
+import android.graphics.Bitmap
 import android.graphics.Color
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
+import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Bundle
-import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
@@ -32,6 +28,10 @@ import com.example.notesapp2.databinding.FragmentNoteBinding
 import com.example.notesapp2.domain.models.Note.Companion.UNDEFINED_ID
 import com.example.notesapp2.presentation.utils.ViewModelFactory
 import com.google.android.material.snackbar.Snackbar
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
+import java.util.*
 
 class NoteFragment : Fragment() {
 
@@ -60,7 +60,7 @@ class NoteFragment : Fragment() {
     private var noteId = UNDEFINED_ID
     private var uri: Uri? = null
     private val getImageFromLibrary =
-        registerForActivityResult(OpenDocument(), ::pickImage)
+        registerForActivityResult(GetContent(), ::pickImage)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         parseArgs()
@@ -159,14 +159,15 @@ class NoteFragment : Fragment() {
     private fun pickImage(result: Uri?) {
         if (result != null) {
             uri = result
-            loadImage(uri.toString())
+            loadImageToStorage(result,UUID.randomUUID().toString())
+//            loadImage(uri.toString())
             binding.llImage.visibility = View.VISIBLE
-            uri?.let {
-                requireActivity().contentResolver.takePersistableUriPermission(
-                    it,
-                    FLAG_GRANT_READ_URI_PERMISSION
-                )
-            }
+//            uri?.let {
+//                requireActivity().contentResolver.takePersistableUriPermission(
+//                    it,
+//                    FLAG_GRANT_READ_URI_PERMISSION
+//                )
+//            }
         }
     }
 
@@ -177,10 +178,49 @@ class NoteFragment : Fragment() {
             .commit()
     }
 
+    private fun loadImageToStorage(uri: Uri, fileName: String) {
+        val bitmap = getBitmapFromUri(uri)
+        var fos: FileOutputStream? = null
+        try {
+            if (bitmap == null) {
+                Toast.makeText(requireActivity(), "Can't save image", Toast.LENGTH_SHORT)
+                    .show()
+                return
+            } else {
+                fos = context?.openFileOutput("$fileName.jpg", Context.MODE_PRIVATE)
+                fos.use {
+                    (bitmap.compress(Bitmap.CompressFormat.JPEG, 60, it))
+                }
+            }
+        } catch (e: FileNotFoundException) {
+            Log.d(TAG, "FileNotFoundException: $e")
+        } catch (e: IOException) {
+            Log.d(TAG, "IOException:$e")
+        } finally {
+            try {
+                fos?.close()
+            } catch (e: IOException) {
+                Log.d(TAG, "IOException:$e ")
+            }
+        }
+    }
+
+    private fun getBitmapFromUri(uri: Uri): Bitmap? {
+        val resolver = requireContext().contentResolver
+        var bitmap: Bitmap? = null
+        try {
+            val decoder = ImageDecoder.createSource(resolver, uri)
+            bitmap = ImageDecoder.decodeBitmap(decoder)
+        } catch (e: Exception) {
+            Log.d(TAG, "Exception: $e")
+        }
+        return bitmap
+    }
+
     private fun initClickListeners() {
         with(binding) {
             ibCamera.setOnClickListener {
-                getImageFromLibrary.launch(arrayOf(MIME_TYPE_IMAGE))
+                getImageFromLibrary.launch(MIME_TYPE_IMAGE)
             }
             image.setOnLongClickListener {
                 image.setImageURI(null)
@@ -246,19 +286,6 @@ class NoteFragment : Fragment() {
 
     }
 
-    @SuppressLint("MissingPermission")
-    private fun getCurrentLocation() {
-        val manager = context?.getSystemService(LOCATION_SERVICE) as LocationManager
-        val listener = LocationListener { p0 -> showLocation(p0) }
-        manager.requestLocationUpdates(
-            LocationManager.GPS_PROVIDER,
-            1000L,
-            10f,
-            listener,
-            Looper.getMainLooper()
-        )
-    }
-
     private fun showDialog() {
         Snackbar
             .make(
@@ -285,12 +312,9 @@ class NoteFragment : Fragment() {
             .show()
     }
 
-    private fun showLocation(location: Location?) {
-        Log.d("TAG", "showLocation: ${location?.latitude} ${location?.longitude}")
-    }
 
     companion object {
-
+        private const val IMAGE_DIR = "image"
         private const val ACTION_MODE_UNKNOWN = "unknown mode"
         private const val MIME_TYPE_IMAGE = "image/*"
         private const val ACTION_MODE_ADD = "add"

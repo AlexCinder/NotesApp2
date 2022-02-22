@@ -2,7 +2,6 @@ package com.example.notesapp2
 
 import android.app.Application
 import com.example.notesapp2.di.AppComponent
-import leakcanary.LeakCanary
 
 class NoteApplication : Application() {
 
@@ -12,6 +11,5 @@ class NoteApplication : Application() {
         super.onCreate()
         component = AppComponent(this)
     }
-
     fun getComponent() = component
 }

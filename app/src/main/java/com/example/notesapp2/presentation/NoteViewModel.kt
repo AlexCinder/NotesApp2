@@ -114,6 +114,10 @@ class NoteViewModel(repository: NoteRepository) : ViewModel() {
         )
     }
 
+    fun saveBitmapToStorage(){
+
+    }
+
     private fun parseTitle(title: String?): String {
         return title?.trim() ?: ""
     }
